@@ -1,3 +1,3 @@
-const config = require('@repo/jest-config/next');
+const config = require('@nova/jest-config/next');
 
 module.exports = config();

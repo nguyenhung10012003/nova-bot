@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "description": "Template for Turborepo, using Nest, Next.js, and Shadcn",
-  "author": "Milos",
+  "author": {
+    "name": "milos",
+    "email": "nguyenhung1012003@gmail.com"
+  },
   "license": "MIT",
   "scripts": {
     "dev": "turbo dev",
@@ -12,11 +15,11 @@
     "test:e2e": "turbo test:e2e",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "shadcn:add": "yarn workspace @repo/ui shadcn:add"
+    "shadcn:add": "yarn workspace @nova/ui shadcn:add"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@nova/eslint-config": "*",
+    "@nova/typescript-config": "*",
     "eslint": "^8",
     "prettier": "^3.2.5",
     "turbo": "^2.1.3"

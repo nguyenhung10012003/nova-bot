@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/ui/button';
+import { Button } from '@nova/ui/components/ui/button';
 
 const RootPage = ({ params }: { params: { forTest?: boolean } }) => {
   return (

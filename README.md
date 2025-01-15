@@ -21,10 +21,10 @@ This Turborepo includes the following packages/apps:
     │   ├── api                       # NestJS app (https://nestjs.com).
     │   └── web                       # Next.js app (https://nextjs.org).
     └── packages
-        ├── @repo/eslint-config       # `eslint` configurations (includes `prettier`)
-        ├── @repo/jest-config         # `jest` configurations
-        ├── @repo/typescript-config   # `tsconfig.json`s used throughout the monorepo
-        └── @repo/ui                  # Shareable stub React component library, using shadcn/ui (https://ui.shadcn.com/).
+        ├── @nova/eslint-config       # `eslint` configurations (includes `prettier`)
+        ├── @nova/jest-config         # `jest` configurations
+        ├── @nova/typescript-config   # `tsconfig.json`s used throughout the monorepo
+        └── @nova/ui                  # Shareable stub React component library, using shadcn/ui (https://ui.shadcn.com/).
 
 ### Utilities
 
@@ -79,14 +79,14 @@ yarn run test
 # You can launch e2e testes with `test:e2e`
 yarn run test:e2e
 
-# See `@repo/jest-config` to customize the behavior.
+# See `@nova/jest-config` to customize the behavior.
 ```
 
 #### Lint
 
 ```bash
 # Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
+# See `@nova/eslint-config` to customize the behavior.
 yarn run lint
 ```
 

@@ -11,10 +11,10 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@repo/ui/components",
-    "ui": "@repo/ui/components/ui",
-    "utils": "@repo/ui/lib/utils",
-    "lib": "@repo/ui/lib",
-    "hooks": "@repo/ui/hooks"
+    "components": "@nova/ui/components",
+    "ui": "@nova/ui/components/ui",
+    "utils": "@nova/ui/lib/utils",
+    "lib": "@nova/ui/lib",
+    "hooks": "@nova/ui/hooks"
   }
 }
