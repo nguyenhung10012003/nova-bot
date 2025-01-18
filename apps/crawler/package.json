@@ -20,8 +20,8 @@
     "start": "node dist/main.js",
     "dev": "tsx --watch src/main.ts",
     "build": "tsc",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --passWithNoTests --watch"
   },
   "license": "ISC"
 }

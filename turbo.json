@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": [".env"],
+  "globalEnv": ["NO_COLOR", "DEBUG"],
   "tasks": {
     "dev": {
       "cache": false,

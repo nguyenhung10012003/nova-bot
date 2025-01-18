@@ -4,7 +4,11 @@ import {
   PredictionData,
   PredictionResponse,
 } from './prediction';
-import { UpsertVectorData, UpsertVectorResponse, VectorUpsertApi } from './vector-upsert';
+import {
+  UpsertVectorData,
+  UpsertVectorResponse,
+  VectorUpsertApi,
+} from './vector-upsert';
 
 export class FlowiseApi implements PredictionApi, VectorUpsertApi {
   baseUrl: string;
@@ -58,8 +62,6 @@ export class FlowiseApi implements PredictionApi, VectorUpsertApi {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-
-          //@ts-ignore
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
@@ -101,18 +103,16 @@ export class FlowiseApi implements PredictionApi, VectorUpsertApi {
   async upsertVector(data: UpsertVectorData): Promise<UpsertVectorResponse> {
     const upsertVectorUrl = `${this.baseUrl}/api/v1/vector/upsert/${data.chatflowId}`;
 
-
     const options: RequestInit = {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     };
     if (this.apiKey) {
       (options.headers as Record<string, string>)['Authorization'] =
         `Bearer ${this.apiKey}`;
-    }
-
-    if (data.files) {
-      const formData = new FormData();
-
     }
 
     try {
@@ -123,5 +123,4 @@ export class FlowiseApi implements PredictionApi, VectorUpsertApi {
       throw new Error('Error upserting vector');
     }
   }
-
 }

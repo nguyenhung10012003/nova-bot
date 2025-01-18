@@ -4,10 +4,13 @@ import { AppService } from './app.service';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
   @Get()
-  async getHello() {
-    await this.appService.getPrediction();
-    return this.appService.getHello();
+  async ping() {
+    return 'pong!';
+  }
+
+  @Get('upsert')
+  async upsertChatflow() {
+    return this.appService.upsertChatflow();
   }
 }

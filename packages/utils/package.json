@@ -5,9 +5,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --passWithNoTests --watch",
+    "test:e2e": "jest --passWithNoTests --config ./test/jest-e2e.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\""
   },
   "dependencies": {
