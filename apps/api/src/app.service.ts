@@ -25,7 +25,7 @@ export class AppService implements OnModuleInit {
       async () => {
         Logger.log('Crawling https://ftech.ai', 'AppService');
         const data = await crawl({
-          urls: ['https://ftech.ai', 'http://localhost:3000'],
+          urls: ['https://ftech.ai'],
           match: 'https://ftech.ai/*',
           fileOptions: {
             extensionMatch: 'pdf',

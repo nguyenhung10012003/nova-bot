@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "prisma:generate": "yarn workspace api prisma:generate",
     "test": "turbo test",
     "test:e2e": "turbo test:e2e",
     "lint": "turbo lint",
@@ -27,9 +28,9 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "yarn@1.22.21",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "packageManager": "yarn@4.6.0"
 }
