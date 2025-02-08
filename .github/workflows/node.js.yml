@@ -28,14 +28,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Install latest Yarn
-        run: corepack prepare yarn@stable --activate
+      run: corepack prepare yarn@stable --activate
 
     - name: Activate latest Yarn
-        run: yarn set version stable
+      run: yarn set version stable
 
     - name: Install Node.js dependencies
-        run: yarn install --immutable --immutable-cache --check-cache
-        
+      run: yarn install --immutable --immutable-cache --check-cache
+
     - run: yarn lint
     - run: yarn run build 
     - run: yarn test
