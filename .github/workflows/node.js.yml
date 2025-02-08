@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'      
+          cache: 'yarn'
 
       - name: Install latest Yarn
         run: corepack prepare yarn@stable --activate
@@ -37,7 +37,7 @@ jobs:
         run: yarn set version stable
 
       - name: Install Node.js dependencies
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: yarn install --immutable
 
       - run: yarn lint
       - run: yarn run build
