@@ -5,13 +5,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,22 +19,26 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
-    - name: Install latest Yarn
-      run: corepack prepare yarn@stable --activate
+      - name: enable corepack
+        run: corepack enable
 
-    - name: Activate latest Yarn
-      run: yarn set version stable
+      - name: Install latest Yarn
+        run: corepack prepare yarn@stable --activate
 
-    - name: Install Node.js dependencies
-      run: yarn install --immutable --immutable-cache --check-cache
+      - name: Activate latest Yarn
+        run: yarn set version stable
 
-    - run: yarn lint
-    - run: yarn run build 
-    - run: yarn test
+      - name: Install Node.js dependencies
+        run: yarn install --immutable --immutable-cache --check-cache
+
+      - run: yarn lint
+      - run: yarn run build
+      - run: yarn test

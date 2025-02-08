@@ -60,4 +60,13 @@ pnpm-debug.log*
 # Misc
 .DS_Store
 *.pem
-.yarn/install-state.gz
+
+
+# yarn v4
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
