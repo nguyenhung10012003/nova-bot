@@ -64,7 +64,7 @@ export function getPageHtml(
           XPathResult.ANY_TYPE,
           null,
         );
-        let result = elements.iterateNext();
+        const result = elements.iterateNext();
         if (result && result instanceof HTMLElement && ignoreSelector) {
           const ignoredElements = result.querySelectorAll(ignoreSelector);
           ignoredElements.forEach((el) => el.remove());

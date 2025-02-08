@@ -1,7 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
-  "globalEnv": ["NO_COLOR", "DEBUG"],
+  "globalEnv": [
+    "NO_COLOR",
+    "DEBUG",
+    "NODE_ENV",
+    "PORT",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD",
+    "TIMEZONE"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
