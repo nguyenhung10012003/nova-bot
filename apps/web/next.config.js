@@ -1,5 +1,9 @@
+const createNextIntlPlugin = require('next-intl/plugin');
+
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
-module.exports = {
+module.exports = withNextIntl({
   transpilePackages: ['@nova/ui'],
   output: 'standalone',
-};
+});
