@@ -11,6 +11,6 @@ export class AppController {
 
   @Get('upsert')
   async upsertChatflow() {
-    return this.appService.upsertChatflow();
+    // return this.appService.upsertChatflow();
   }
 }

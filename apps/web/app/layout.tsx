@@ -4,7 +4,9 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import { PropsWithChildren } from 'react';
 
+import { AuthProvider } from '@/components/auth-provider';
 import '@nova/ui/globals.css';
+import { ThemeProvider } from '../components/theme-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,10 +25,17 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className={inter.className} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

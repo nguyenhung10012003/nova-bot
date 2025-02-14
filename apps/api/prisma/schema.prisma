@@ -14,7 +14,29 @@ datasource db {
 }
 
 model Document {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  pageContent   String
-  metadata      String
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  pageContent String
+  metadata    String
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  name      String?
+  password  String?
+  chatflows Chatflow[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Chatflow {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  chatflowId String   @unique
+  apiKey     String?
+  baseUrl    String?
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

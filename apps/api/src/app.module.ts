@@ -3,9 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { config } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
-import { config } from './config';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { config } from './config';
     }),
     ScheduleModule.forRoot(),
     PrismaModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [SchedulerService, AppService],
