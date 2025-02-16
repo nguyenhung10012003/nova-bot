@@ -20,7 +20,7 @@
     },
     "build": {
       "cache": false,
-      "dependsOn": ["^build", "^prisma:generate"],
+      "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {},

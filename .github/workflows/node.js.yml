@@ -40,5 +40,6 @@ jobs:
         run: yarn install --immutable
 
       - run: yarn lint
+      - run: yarn prisma:generate
       - run: yarn run build
       - run: yarn test
