@@ -77,6 +77,9 @@ export class API {
       for (const { successInterceptor } of this.responseInterceptors) {
         response = await successInterceptor(response);
       }
+      if (!response.ok) {
+        throw response;
+      }
 
       return response.json();
     } catch (error) {
@@ -91,7 +94,7 @@ export class API {
 
   async get<DataType = any, ErrorType = any>(
     url: string,
-    init?: RequestInit,
+    init?: RequestInitWithNext,
   ): Promise<ResponseType<DataType, ErrorType>> {
     return this.request<DataType, ErrorType>(url, { ...init, method: 'GET' });
   }

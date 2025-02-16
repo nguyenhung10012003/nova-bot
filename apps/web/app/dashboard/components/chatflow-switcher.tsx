@@ -32,9 +32,10 @@ export function ChatflowSwitcher({
   const router = useRouter();
   const params = useParams<{ chatflowId: string }>();
 
-  React.useEffect(() => {
-    if (activeChatflow) router.push(`/dashboard/${activeChatflow.id}`);
-  }, [activeChatflow]);
+  const handleChatflowChange = (chatflow: { name: string; id: string }) => {
+    setActiveChatflow(chatflow);
+    router.push(`/dashboard/${chatflow.id}`);
+  };
 
   React.useEffect(() => {
     if (params.chatflowId) {
@@ -82,8 +83,8 @@ export function ChatflowSwitcher({
             </DropdownMenuLabel>
             {chatflows.map((chatflow, index) => (
               <DropdownMenuItem
-                key={chatflow.name}
-                onClick={() => setActiveChatflow(chatflow)}
+                key={index}
+                onClick={() => handleChatflowChange(chatflow)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">

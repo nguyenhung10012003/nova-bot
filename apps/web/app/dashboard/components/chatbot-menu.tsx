@@ -46,7 +46,10 @@ export function ChatbotMenu() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={`/${params.chatflowId}/playground`} prefetch={false}>
+              <Link
+                href={`/dashboard/${params.chatflowId}/playground`}
+                prefetch={false}
+              >
                 <SquareTerminal />
                 <span>Playground</span>
               </Link>
@@ -54,20 +57,61 @@ export function ChatbotMenu() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={`/${params.chatflowId}/history`} prefetch={false}>
+              <Link
+                href={`/dashboard/${params.chatflowId}/history`}
+                prefetch={false}
+              >
                 <History />
                 <span>History</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href={`/${params.chatflowId}/sources`} prefetch={false}>
-                <FileStack />
-                <span>Sources</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Collapsible>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild className="group/collapsible">
+                <SidebarMenuButton>
+                  <FileStack />
+                  <span>Sources</span>
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link
+                        href={`/dashboard/${params.chatflowId}/sources/web`}
+                        prefetch={false}
+                      >
+                        <span>Web</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link
+                        href={`/dashboard/${params.chatflowId}/sources/file`}
+                        prefetch={false}
+                      >
+                        <span>File</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild>
+                      <Link
+                        href={`/dashboard/${params.chatflowId}/sources/text`}
+                        prefetch={false}
+                      >
+                        <span>Text</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
           <Collapsible>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className="group/collapsible">
@@ -82,7 +126,7 @@ export function ChatbotMenu() {
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild>
                       <Link
-                        href={`/${params.chatflowId}/connect?channel=fb`}
+                        href={`/dashboard/${params.chatflowId}/connect?channel=fb`}
                         prefetch={false}
                       >
                         <span>Facebook</span>
@@ -92,7 +136,7 @@ export function ChatbotMenu() {
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild>
                       <Link
-                        href={`/${params.chatflowId}/connect?channel=telegram`}
+                        href={`/dashboard/${params.chatflowId}/connect?channel=telegram`}
                         prefetch={false}
                       >
                         <span>Telegram</span>
@@ -106,7 +150,10 @@ export function ChatbotMenu() {
 
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={`/${params.chatflowId}/integration`} prefetch={false}>
+              <Link
+                href={`/dashboard/${params.chatflowId}/integration`}
+                prefetch={false}
+              >
                 <Code />
                 <span>Integration</span>
               </Link>
@@ -114,7 +161,10 @@ export function ChatbotMenu() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={`/${params.chatflowId}/setting`} prefetch={false}>
+              <Link
+                href={`/dashboard/${params.chatflowId}/setting`}
+                prefetch={false}
+              >
                 <Settings />
                 <span>Setting</span>
               </Link>

@@ -1,3 +1,4 @@
+import { api } from '@/api/api';
 import {
   Sidebar,
   SidebarContent,
@@ -10,24 +11,26 @@ import { ChatflowSwitcher } from './chatflow-switcher';
 import { HelpMenu } from './help-menu';
 import { UserMenu } from './user-menu';
 
-const data = {
-  chatflows: [
-    {
-      name: 'Chatflow 1',
-      id: '1',
-    },
-    {
-      name: 'Chatflow 2',
-      id: '2',
-    },
-  ],
+const getChatflows = async () => {
+  try {
+    return await api.get('/chatflow', {
+      next: {
+        tags: ['chatflows'],
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
-export function DashboardSidebar() {
+export async function DashboardSidebar() {
+  const chatflows = await getChatflows();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <ChatflowSwitcher chatflows={data.chatflows} />
+        <ChatflowSwitcher chatflows={chatflows || []} />
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>

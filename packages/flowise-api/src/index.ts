@@ -1,3 +1,4 @@
+import { Chatflow, ChatflowsApi } from './chatflows';
 import { ApiClientOptions } from './common';
 import {
   PredictionApi,
@@ -10,7 +11,9 @@ import {
   VectorUpsertApi,
 } from './vector-upsert';
 
-export class FlowiseApi implements PredictionApi, VectorUpsertApi {
+export class FlowiseApi
+  implements PredictionApi, VectorUpsertApi, ChatflowsApi
+{
   baseUrl: string;
   apiKey: string;
 
@@ -24,9 +27,6 @@ export class FlowiseApi implements PredictionApi, VectorUpsertApi {
     const chatFlowStreamingUrl = `${this.baseUrl}/api/v1/chatflows-streaming/${chatflowId}`;
     const resp = await fetch(chatFlowStreamingUrl, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     const chatFlowStreamingData = await resp.json();
@@ -105,22 +105,70 @@ export class FlowiseApi implements PredictionApi, VectorUpsertApi {
 
     const options: RequestInit = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     };
+
+    return this.sendRequest(upsertVectorUrl, options);
+  }
+
+  async getChatflows(): Promise<Chatflow[]> {
+    const chatflowsUrl = `${this.baseUrl}/api/v1/chatflows`;
+
+    return this.sendRequest(chatflowsUrl, {
+      method: 'GET',
+    });
+  }
+
+  async getChatflow(id: string): Promise<Chatflow> {
+    const chatflowUrl = `${this.baseUrl}/api/v1/chatflows/${id}`;
+
+    return this.sendRequest(chatflowUrl, {
+      method: 'GET',
+    });
+  }
+
+  async createChatflow(data: Chatflow): Promise<Chatflow> {
+    const chatflowsUrl = `${this.baseUrl}/api/v1/chatflows`;
+
+    return this.sendRequest(chatflowsUrl, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateChatflow(id: string, data: Partial<Chatflow>): Promise<Chatflow> {
+    const chatflowUrl = `${this.baseUrl}/api/v1/chatflows/${id}`;
+
+    return this.sendRequest(chatflowUrl, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteChatflow(id: string): Promise<Chatflow> {
+    const chatflowUrl = `${this.baseUrl}/api/v1/chatflows/${id}`;
+
+    return this.sendRequest(chatflowUrl, {
+      method: 'DELETE',
+    });
+  }
+
+  private async sendRequest<T>(url: string, options: RequestInit): Promise<T> {
     if (this.apiKey) {
       (options.headers as Record<string, string>)['Authorization'] =
         `Bearer ${this.apiKey}`;
     }
 
     try {
-      const response = await fetch(upsertVectorUrl, options);
+      if (!(options.headers as Record<string, string>)['Content-Type']) {
+        (options.headers as Record<string, string>)['Content-Type'] =
+          'application/json';
+      }
+      const response = await fetch(url, options);
       const resp = await response.json();
-      return resp as UpsertVectorResponse;
+      return resp as T;
     } catch (error) {
-      throw new Error('Error upserting vector');
+      throw new Error('Error sending request');
     }
   }
 }

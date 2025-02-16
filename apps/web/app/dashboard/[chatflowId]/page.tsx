@@ -20,32 +20,32 @@ export default function ChatflowPage({
   const widgets: Widget[] = [
     {
       title: 'Playground',
-      href: `/${params.chatflowId}/playground`,
+      href: `/dashboard/${params.chatflowId}/playground`,
       description: 'Test your chatflow by sending messages to it',
       icon: Icons.SquareTerminal,
     },
     {
       title: 'History',
-      href: `/${params.chatflowId}/history`,
+      href: `/dashboard/${params.chatflowId}/history`,
       description: 'View all your chatflow messages from users',
       icon: Icons.History,
     },
     {
       title: 'Sources',
-      href: `/${params.chatflowId}/sources`,
+      href: `/dashboard/${params.chatflowId}/sources`,
       description: 'Manage your chatflow sources and settings for each source',
       icon: Icons.FileStack,
     },
     {
       title: 'Connect',
-      href: `/${params.chatflowId}/connect`,
+      href: `/dashboard/${params.chatflowId}/connect`,
       description:
         'Connect your chatflow to Facebook Messenger, WhatsApp, and more',
       icon: Icons.Connect,
     },
     {
       title: 'Integration',
-      href: `/${params.chatflowId}/integration`,
+      href: `/dashboard/${params.chatflowId}/integration`,
       description: 'Embed your chatflow on your website or app',
       icon: Icons.Integration,
     },
