@@ -1,6 +1,6 @@
 'use client';
 import { FileUpload } from '@/components/file-upload';
-import { Source } from '@/components/source';
+import { Source } from '@/components/source/source';
 import {
   Accordion,
   AccordionContent,

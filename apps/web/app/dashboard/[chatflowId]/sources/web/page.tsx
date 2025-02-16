@@ -1,5 +1,5 @@
 import { api } from '@/api/api';
-import { WebSourceDialog } from '@/components/web-source-dialog';
+import { WebSourceDialog } from '@/components/source/web-source-dialog';
 import { Badge } from '@nova/ui/components/ui/badge';
 import { Card } from '@nova/ui/components/ui/card';
 import Link from 'next/link';

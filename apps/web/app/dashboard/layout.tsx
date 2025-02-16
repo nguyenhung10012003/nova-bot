@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from '@nova/ui/components/ui/sidebar';
 import { PropsWithChildren } from 'react';
-import { DashboardHeader } from './components/dashboard-header';
-import { DashboardSidebar } from './components/sidebar';
+import { DashboardHeader } from '../../components/layout/dashboard-header';
+import { DashboardSidebar } from '../../components/layout/sidebar';
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
   return (
