@@ -17,6 +17,8 @@ model Document {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   pageContent String
   metadata    String
+  sourceId    String @db.ObjectId
+  source      Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -39,4 +41,54 @@ model Chatflow {
   user       User     @relation(fields: [userId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  sources    Source[]
+}
+
+enum SourceType {
+  WEBSITE
+  FILE
+  TEXT
+}
+
+enum UrlType {
+  URL
+  FILE
+}
+
+type Url {
+  url  String
+  type UrlType
+}
+
+type AutoFetchSetting {
+  cronExpression String
+  isEnabled      Boolean?
+  matchPattern   String?
+  excludePattern String?
+  filePattern    String?
+}
+
+enum SourceStatus {
+  CREATED
+  PROCESSING
+  SYNCED
+  ERROR
+}
+
+model Source {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  type         SourceType
+  text         String?
+  urls         Url[]
+  rootUrl      String?
+  autoFetch    AutoFetchSetting?
+  sourceStatus SourceStatus      @default(CREATED)
+  file         String?
+  chatflowId   String            @db.ObjectId
+  chatflow     Chatflow          @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
+  lastFetch    DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  documents    Document[]
 }
