@@ -1,6 +1,6 @@
 'use client';
 import { Button, ButtonProps } from '@nova/ui/components/ui/button';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export function GotoBtn({
   to,
