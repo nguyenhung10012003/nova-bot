@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google';
 import { PropsWithChildren } from 'react';
 
 import { AuthProvider } from '@/components/auth-provider';
-import { Toaster } from '@nova/ui/components/ui/sonner';
 import '@nova/ui/globals.css';
 import { ThemeProvider } from '../components/theme-provider';
 
@@ -35,10 +34,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>
-              {children}
-              <Toaster />
-            </AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

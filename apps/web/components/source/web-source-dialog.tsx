@@ -16,7 +16,6 @@ import { Label } from '@nova/ui/components/ui/label';
 import { Plus } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { toast } from 'sonner';
 
 type WebSourceDialogProps = {
   source?: {
@@ -50,21 +49,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
     if (isEdit) {
-      try {
-        await api.patch(`/sources/${source?.id}`, {
-          name: data.name,
-          rootUrl: data.url,
-          type: 'WEBSITE',
-          chatflowId,
-        });
-        revalidate('sources');
-        revalidate(`source-${source?.id}`);
-        setOpen(false);
-        toast('Source updated successfully');
-      } catch (e) {
-        console.error(e);
-        toast('Failed to update source');
-      }
+      // update source
     } else {
       try {
         await api.post('/sources', {
@@ -73,11 +58,8 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
           type: 'WEBSITE',
           chatflowId,
         });
-        setOpen(false);
-        toast('Source created successfully');
       } catch (e) {
         console.error(e);
-        toast('Failed to create source');
       }
       revalidate('sources');
     }
@@ -103,23 +85,11 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
         <form className="flex flex-col gap-4" onSubmit={onSubmit}>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              name="name"
-              placeholder="Example page"
-              defaultValue={source?.name}
-            />
+            <Input id="name" type="text" name="name" />
           </div>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="url">Url</Label>
-            <Input
-              id="url"
-              type="text"
-              name="url"
-              placeholder="https://example.com"
-              defaultValue={source?.rootUrl}
-            />
+            <Input id="url" type="text" name="url" />
           </div>
           <DialogFooter>
             <Button type="submit">Save</Button>
