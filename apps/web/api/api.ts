@@ -1,3 +1,6 @@
+import { getCookie } from 'cookies-next';
+import { redirect } from 'next/navigation';
+
 type RequestInterceptor = (config: RequestInit) => Promise<RequestInit>;
 type ResponseSuccessInterceptor<DataType = any> = (
   response: Response,
@@ -74,21 +77,22 @@ export class API {
     try {
       let response = await fetch(`${this.baseUrl}${input}`, init);
 
-      for (const { successInterceptor } of this.responseInterceptors) {
-        response = await successInterceptor(response);
-      }
       if (!response.ok) {
         throw response;
       }
 
-      return response.json();
+      for (const { successInterceptor } of this.responseInterceptors) {
+        response = await successInterceptor(response);
+      }
+
+      return response as DataType;
     } catch (error) {
       for (const { errorInterceptor } of this.responseInterceptors) {
         if (errorInterceptor) {
-          await errorInterceptor(error);
+          error = await errorInterceptor(error);
         }
       }
-      throw error;
+      return error as ErrorType;
     }
   }
 
@@ -158,19 +162,17 @@ export const api = API.getInstance({
 api.interceptors.request.use(async (config) => {
   if (isServer) {
     const { cookies } = await import('next/headers'),
-      token = cookies().get('token')?.value;
-    if (token) {
+      user = JSON.parse(cookies().get('user')?.value || 'null');
+    if (user && user.token) {
       if (!config.headers) {
         config.headers = {};
       }
       (config.headers as Record<string, string>)['Authorization'] =
-        `Bearer ${token}`;
+        `Bearer ${user.token}`;
     }
   } else {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-      '$1',
-    );
+    const user = JSON.parse((await getCookie('user')) || 'null');
+    const token = user?.token;
     if (token) {
       (config.headers as Record<string, string>)['Authorization'] =
         `Bearer ${token}`;
@@ -178,3 +180,23 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  async (response) => response.json(),
+  async (error) => {
+    console.error('Error fetch: ', error);
+    if (error.status === 401) {
+      if (isServer) {
+        redirect('/logout');
+      } else {
+        window.location.href = '/logout';
+      }
+    }
+
+    if (error instanceof Error) {
+      return { error: error.message };
+    } else {
+      return { error: 'unknown error' };
+    }
+  },
+);

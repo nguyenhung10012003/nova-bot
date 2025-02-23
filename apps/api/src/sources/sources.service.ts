@@ -1,10 +1,17 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
+import { Source } from '@prisma/client';
+import { Queue } from 'bullmq';
+import { CrawlService } from 'src/crawl/crawl.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSourceDto } from './sources.dto';
 
 @Injectable()
 export class SourcesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly crawlService: CrawlService,
+  ) {}
 
   async getSources({
     chatflowId,
@@ -20,22 +27,33 @@ export class SourcesService {
 
   async getSource(id: string) {
     return this.prisma.source.findUnique({
-      where: { id } ,
+      where: { id },
     });
   }
 
   async createSource(data: CreateSourceDto) {
-    console.log(data);
-    return this.prisma.source.create({
+    const source = await this.prisma.source.create({
       data,
     });
+
+    if (source.type === 'WEBSITE') {
+      this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
+    }
+
+    return source;
   }
 
   async updateSource(id: string, data: Partial<CreateSourceDto>) {
-    return this.prisma.source.update({
+    const source = await this.prisma.source.update({
       where: { id },
       data,
     });
+
+    if (source.type === 'WEBSITE') {
+      this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
+    }
+
+    return source;
   }
 
   async deleteSource(id: string) {

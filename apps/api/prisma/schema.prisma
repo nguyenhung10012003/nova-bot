@@ -14,11 +14,13 @@ datasource db {
 }
 
 model Document {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   pageContent String
   metadata    String
-  sourceId    String @db.ObjectId
-  source      Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId    String   @db.ObjectId
+  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  chatflowId  String   @db.ObjectId
+  chatflow    Chatflow @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -42,6 +44,7 @@ model Chatflow {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   sources    Source[]
+  documents Document[]
 }
 
 enum SourceType {
@@ -60,35 +63,38 @@ type Url {
   type UrlType
 }
 
-type AutoFetchSetting {
-  cronExpression String
-  isEnabled      Boolean?
+type FetchSetting {
+  autoFetch      Boolean?
+  cronExpression String?
   matchPattern   String?
   excludePattern String?
   filePattern    String?
+  maxUrlsToCrawl Int?
+  maxDepth       Int?
 }
 
 enum SourceStatus {
   CREATED
   PROCESSING
+  PROCESSED
   SYNCED
   ERROR
 }
 
 model Source {
-  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   type         SourceType
   text         String?
   urls         Url[]
   rootUrl      String?
-  autoFetch    AutoFetchSetting?
-  sourceStatus SourceStatus      @default(CREATED)
+  fetchSetting FetchSetting?
+  sourceStatus SourceStatus  @default(CREATED)
   file         String?
-  chatflowId   String            @db.ObjectId
-  chatflow     Chatflow          @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
+  chatflowId   String        @db.ObjectId
+  chatflow     Chatflow      @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
   lastFetch    DateTime?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   documents    Document[]
 }

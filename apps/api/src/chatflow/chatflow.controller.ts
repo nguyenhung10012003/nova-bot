@@ -39,6 +39,16 @@ export class ChatflowController {
     return this.chatflowService.getChatflow(id);
   }
 
+  @Get(':id/upsert')
+  async upsertChatflow(@Param('id') id: string) {
+    return this.chatflowService.upsertChatflow(id);
+  }
+
+  @Get(':id/upsert-callback')
+  async upsertChatflowCallback(@Param('id') id: string) {
+    return this.chatflowService.upsertChatflowCallback(id);
+  }
+
   @Patch(':id')
   async updateChatflow(
     @Param('id') id: string,

@@ -32,6 +32,7 @@ export function LoginForm({
       setAuth(response);
       router.push('/dashboard'); // Redirect to dashboard on successful sign-in
     } catch (error) {
+      console.error(error);
       setSubmitError('An error occurred. Please try again.');
     }
   };

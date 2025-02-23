@@ -11,6 +11,8 @@ import { config } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
+import { BullModule } from '@nestjs/bullmq';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -19,6 +21,11 @@ import { SourcesModule } from './sources/sources.module';
       load: [() => config],
     }),
     ScheduleModule.forRoot(),
+    BullModule.forRoot({
+      connection: config.redis,
+      prefix: "nova"
+    }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
     ChatflowModule,

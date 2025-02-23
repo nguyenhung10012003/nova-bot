@@ -6,4 +6,5 @@ const withNextIntl = createNextIntlPlugin();
 module.exports = withNextIntl({
   transpilePackages: ['@nova/ui'],
   output: 'standalone',
+  reactStrictMode: false,
 });

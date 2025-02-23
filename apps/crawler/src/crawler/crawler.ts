@@ -1,11 +1,11 @@
-import { minimatch } from "minimatch";
-import puppeteer, { Browser, Page } from "puppeteer";
-import { getPageHtml, waitForXPath } from "./utils";
+import { minimatch } from 'minimatch';
+import puppeteer, { Browser, Page } from 'puppeteer';
+import { getFileUrls, getPageHtml, waitForXPath } from './utils';
 
 export type RequestHandler = (
   page: Page,
   url: string,
-  push: (urls: string[]) => void
+  push: (urls: string[]) => void,
 ) => Promise<void>;
 
 export interface CrawlerOptions {
@@ -37,7 +37,7 @@ export class Crawler {
   private requestHandler: (
     page: Page,
     url: string,
-    push: (urls: string[]) => void
+    push: (urls: string[]) => void,
   ) => Promise<void>;
   private maxUrlsToCrawl: number;
   private maxConcurrencies: number;
@@ -56,12 +56,12 @@ export class Crawler {
     this.push(startUrls);
     this.browser = await puppeteer.launch();
     this.isRunning = true;
-  
+
     return new Promise<void>((resolve) => {
       this.processQueue(resolve);
     });
   }
-  
+
   private async processQueue(resolve: () => void) {
     while (
       this.isRunning &&
@@ -70,7 +70,7 @@ export class Crawler {
     ) {
       const url = this.urlQueue.shift();
       if (!url) break;
-  
+
       this.activeCrawls++;
       this.crawl(url).finally(() => {
         this.activeCrawls--;
@@ -95,7 +95,7 @@ export class Crawler {
     try {
       this.crawledUrls.add(url);
       page = await this.browser.newPage();
-      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
       await this.requestHandler(page, url, this.push.bind(this));
     } catch (error) {
       console.error(`Error crawling ${url}:`, error);
@@ -130,6 +130,9 @@ export interface CrawlOptions {
   exclude?: string | string[];
   maxUrlsToCrawl?: number;
   maxConcurrencies?: number;
+  file?: {
+    extensionMatch: string;
+  };
 }
 
 export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
@@ -138,11 +141,11 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
     requestHandler: async (page, url, push) => {
       // Wait for the selector to appear on the page
       if (options.selector) {
-        if (options.selector.startsWith("/")) {
+        if (options.selector.startsWith('/')) {
           await waitForXPath(
             page,
             options.selector,
-            options.waitForSelectorTimeout ?? 1000
+            options.waitForSelectorTimeout ?? 1000,
           );
         } else {
           await page.waitForSelector(options.selector, {
@@ -153,10 +156,10 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
 
       // Get all the links on the page
       const urls = await page.evaluate(() => {
-        const anchorElements = Array.from(document.querySelectorAll("a"));
+        const anchorElements = Array.from(document.querySelectorAll('a'));
         return anchorElements.map((a) => {
           const href = (a as HTMLAnchorElement).href;
-          return href.startsWith("/")
+          return href.startsWith('/')
             ? new URL(href, window.location.origin).href
             : href;
         });
@@ -180,10 +183,17 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
       const content = await getPageHtml(
         page,
         options.selector,
-        options.ignoreSelector
+        options.ignoreSelector,
       );
+      const fileUrls = options.file
+        ? await getFileUrls(
+            page,
+            options.file.extensionMatch,
+            new URL(url).hostname,
+          )
+        : [];
 
-      dataset.push({ url, title, content } as T);
+      dataset.push({ url, title, content, fileUrls } as T);
     },
     maxUrlsToCrawl: options.maxUrlsToCrawl,
     maxConcurrencies: options.maxConcurrencies,

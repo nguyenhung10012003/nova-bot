@@ -4,7 +4,7 @@ import { crawl } from './crawler/crawler';
 
 dotenv.config();
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 const HOST = process.env.HOST || 'localhost';
 
 const server = http.createServer(
@@ -21,6 +21,8 @@ const server = http.createServer(
       } else if (req.method === 'GET' && url.pathname === '/crawl') {
         const urls = url.searchParams.get('urls');
         const match = url.searchParams.get('match');
+        const maxUrlsToCrawl = url.searchParams.get('maxUrlsToCrawl');
+        const fileMatch = url.searchParams.get('fileMatch');
 
         if (!urls || !match) {
           res.writeHead(400);
@@ -31,7 +33,12 @@ const server = http.createServer(
           const data = await crawl({
             urls: urls.split(','),
             match: match.split(','),
-            maxUrlsToCrawl: 10,
+            maxUrlsToCrawl: maxUrlsToCrawl ? parseInt(maxUrlsToCrawl, 10) : 25,
+            file: fileMatch
+              ? {
+                  extensionMatch: fileMatch
+                }
+              : undefined,
             maxConcurrencies: 5
           });
 

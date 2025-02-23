@@ -16,6 +16,7 @@ import { Label } from '@nova/ui/components/ui/label';
 import { Plus } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 type WebSourceDialogProps = {
   source?: {
@@ -49,18 +50,35 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
     if (isEdit) {
-      // update source
-    } else {
-      try {
-        await api.post('/sources', {
-          name: data.name,
-          rootUrl: data.url,
-          type: 'WEBSITE',
-          chatflowId,
-        });
-      } catch (e) {
-        console.error(e);
+      const res = await api.patch(`/sources/${source?.id}`, {
+        name: data.name,
+        rootUrl: data.url,
+        type: 'WEBSITE',
+        chatflowId,
+      });
+      if (res.error) {
+        console.error(res.error);
+        toast('Failed to update source');
+        return;
       }
+      revalidate('sources');
+      revalidate(`source-${source?.id}`);
+      setOpen(false);
+      toast('Source updated successfully');
+    } else {
+      const res = await api.post('/sources', {
+        name: data.name,
+        rootUrl: data.url,
+        type: 'WEBSITE',
+        chatflowId,
+      });
+      if (res.error) {
+        console.error(res.error);
+        toast('Failed to create source');
+        return;
+      }
+      setOpen(false);
+      toast('Source created successfully');
       revalidate('sources');
     }
   };
@@ -85,11 +103,23 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
         <form className="flex flex-col gap-4" onSubmit={onSubmit}>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" type="text" name="name" />
+            <Input
+              id="name"
+              type="text"
+              name="name"
+              placeholder="Example page"
+              defaultValue={source?.name}
+            />
           </div>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="url">Url</Label>
-            <Input id="url" type="text" name="url" />
+            <Input
+              id="url"
+              type="text"
+              name="url"
+              placeholder="https://example.com"
+              defaultValue={source?.rootUrl}
+            />
           </div>
           <DialogFooter>
             <Button type="submit">Save</Button>

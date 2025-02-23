@@ -17,15 +17,11 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const setAuth = useCallback(({ token, refreshToken, userId }: Auth) => {
-    setCookie('token', token);
-    setCookie('refreshToken', refreshToken);
-    setCookie('userId', userId);
+    setCookie('user', JSON.stringify({ userId, token, refreshToken }));
   }, []);
 
   const signout = useCallback(() => {
-    deleteCookie('token');
-    deleteCookie('refreshToken');
-    deleteCookie('userId');
+    deleteCookie('user');
   }, []);
 
   return (

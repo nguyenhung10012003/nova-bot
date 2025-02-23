@@ -6,22 +6,23 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from '@nova/ui/components/ui/sidebar';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { ChatbotMenu } from './chatbot-menu';
 import { ChatflowSwitcher } from './chatflow-switcher';
 import { HelpMenu } from './help-menu';
 import { UserMenu } from './user-menu';
 
 const getChatflows = async () => {
-  try {
-    return await api.get('/chatflow', {
-      next: {
-        tags: ['chatflows'],
-      },
-    });
-  } catch (error) {
-    console.error(error);
+  const res = await api.get('/chatflow', {
+    next: {
+      tags: ['chatflows'],
+    },
+  });
+  if (res.error) {
     return null;
   }
+  return res;
 };
 
 export async function DashboardSidebar() {

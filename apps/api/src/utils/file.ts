@@ -68,7 +68,7 @@ export async function downloadFileFromUrl(
     // Return a promise that resolves when the file is fully written
     return new Promise((resolve, reject) => {
       fileStream.on('finish', () => {
-        resolve(fileName);
+        resolve(outputPath);
       });
 
       fileStream.on('error', (error) => {
