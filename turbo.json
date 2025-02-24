@@ -11,6 +11,7 @@
     "REDIS_PASSWORD",
     "JWT_SECRET",
     "JWT_EXPIRES_IN",
+    "CRAWLER_API_URL",
     "TIMEZONE"
   ],
   "tasks": {

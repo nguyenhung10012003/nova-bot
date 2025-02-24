@@ -6,8 +6,6 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from '@nova/ui/components/ui/sidebar';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { ChatbotMenu } from './chatbot-menu';
 import { ChatflowSwitcher } from './chatflow-switcher';
 import { HelpMenu } from './help-menu';

@@ -1,7 +1,4 @@
-import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { Source } from '@prisma/client';
-import { Queue } from 'bullmq';
 import { CrawlService } from 'src/crawl/crawl.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSourceDto } from './sources.dto';
@@ -37,7 +34,7 @@ export class SourcesService {
     });
 
     if (source.type === 'WEBSITE') {
-      this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
+      await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
     }
 
     return source;
@@ -50,9 +47,21 @@ export class SourcesService {
     });
 
     if (source.type === 'WEBSITE') {
-      this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
+      await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
     }
 
+    return source;
+  }
+
+  async reprocessSource(id: string) {
+    const source = await this.prisma.source.findUnique({
+      where: { id },
+    });
+
+    if (!source) {
+      throw new Error('Source not found');
+    }
+    await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, {...source, refresh: true});
     return source;
   }
 

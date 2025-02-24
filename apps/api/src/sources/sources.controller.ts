@@ -65,6 +65,11 @@ export class SourcesController {
     return this.sourcesService.updateSource(id, data);
   }
 
+  @Patch(':id/reprocess')
+  async reprocessSource(@Param('id') id: string) {
+    return this.sourcesService.reprocessSource(id);
+  }
+
   @Delete(':id')
   async deleteSource(@Param('id') id: string) {
     return this.sourcesService.deleteSource(id);

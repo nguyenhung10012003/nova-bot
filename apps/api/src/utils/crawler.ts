@@ -1,3 +1,5 @@
+import { Logger } from "@nestjs/common";
+
 export interface CrawlOptions {
   urls: string[];
   match: string | string[];
@@ -6,6 +8,7 @@ export interface CrawlOptions {
 }
 
 export async function crawl(options: CrawlOptions) {
+  Logger.debug("Start crawl for urls: " + options.urls.join(", "), "Crawl");
   const apiUrl = process.env.CRAWLER_API_URL || 'http://localhost:4000';
   const fetchUrl = new URL(apiUrl);
   fetchUrl.pathname = '/crawl';
@@ -32,7 +35,7 @@ export async function crawl(options: CrawlOptions) {
       throw new Error(await response.text());
     }
 
-    return await response.json();
+    return (await response.json()).data;
   } catch (e: any) {
     throw new Error(e);
   }

@@ -1,5 +1,32 @@
 import { Page } from "puppeteer";
 
+export function normalizeUrl(url: string): string {
+  try {
+    const normalized = new URL(url);
+    normalized.hash = ""; // Loại bỏ fragment (#...)
+    return normalized.href.replace(/\/$/, ""); // Loại bỏ dấu "/" cuối nếu có
+  } catch {
+    return url.replace(/\/$/, "").split("#")[0]; // Fallback nếu URL không hợp lệ
+  }
+}
+
+
+export function isUrlInCollection(urls: string[] | Set<string>, targetUrl: string): boolean {
+  const normalizedTarget = normalizeUrl(targetUrl);
+
+  if (Array.isArray(urls)) {
+    return urls.some(url => normalizeUrl(url) === normalizedTarget);
+  }
+
+  for (const url of urls) {
+    if (normalizeUrl(url) === normalizedTarget) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Wait for an element to appear in the page
  * @param page - The Playwright page object

@@ -1,9 +1,11 @@
 import { api } from '@/api/api';
 import { GotoBtn } from '@/components/goto-btn';
 import DeleteSource from '@/components/source/delete-source';
+import { RerefreshSource } from '@/components/source/refresh-source';
+import { SourceControlCard } from '@/components/source/source-control-card';
+import SourceStatusBadge from '@/components/source/source-status-badge';
 import { UrlList } from '@/components/source/url-list';
 import { WebSourceDialog } from '@/components/source/web-source-dialog';
-import { Badge } from '@nova/ui/components/ui/badge';
 import { Button } from '@nova/ui/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
 
@@ -56,18 +58,21 @@ export default async function Page({
             }
           />
         </div>
-        <div className='flex'>
+        <div className="flex gap-2">
+          <RerefreshSource source={source} />
           <DeleteSource source={source} />
         </div>
       </div>
       <div className="flex mt-4">
-        <Badge>{source.sourceStatus}</Badge>
+        <SourceStatusBadge status={source.sourceStatus} />
       </div>
-      <div className="flex flex-col md:flex-row mt-8 gap-4">
-        <div className="flex basis-2/3 shrink-0 w-full flex-col">
+      <div className="flex flex-col md:flex-row mt-8">
+        <div className="flex basis-3/5 shrink-0 w-full flex-col">
           <UrlList urls={source?.urls || []} />
         </div>
-        <div className="basis-1/3 shrink-0 w-full"></div>
+        <div className="basis-2/5 shrink-0 w-full relative md:pl-4 py-4">
+          <SourceControlCard source={source} />
+        </div>
       </div>
     </div>
   );

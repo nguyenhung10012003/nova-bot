@@ -1,6 +1,12 @@
 import { minimatch } from 'minimatch';
 import puppeteer, { Browser, Page } from 'puppeteer';
-import { getFileUrls, getPageHtml, waitForXPath } from './utils';
+import {
+  getFileUrls,
+  getPageHtml,
+  isUrlInCollection,
+  normalizeUrl,
+  waitForXPath,
+} from './utils';
 
 export type RequestHandler = (
   page: Page,
@@ -106,8 +112,11 @@ export class Crawler {
 
   push(urls: string[]) {
     urls.forEach((url) => {
-      if (!this.crawledUrls.has(url) && !this.urlQueue.includes(url)) {
-        this.urlQueue.push(new URL(url).href);
+      if (
+        !isUrlInCollection(this.crawledUrls, url) &&
+        !isUrlInCollection(this.urlQueue, url)
+      ) {
+        this.urlQueue.push(normalizeUrl(url));
       }
     });
   }

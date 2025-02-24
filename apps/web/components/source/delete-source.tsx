@@ -15,6 +15,11 @@ import {
 } from '@nova/ui/components/ui/alert-dialog';
 import { Button } from '@nova/ui/components/ui/button';
 import { toast } from '@nova/ui/components/ui/sonner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@nova/ui/components/ui/tooltip';
 import { Trash } from 'lucide-react';
 
 type DeleteSourceProps = {
@@ -40,11 +45,15 @@ export default function DeleteSource({ source }: DeleteSourceProps) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant={'destructive'} className="gap-2">
-          <span>Delete</span>
-          <Trash className="w-5 h-5" />
-        </Button>
+      <AlertDialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant={'destructive'} size="icon">
+              <Trash />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete</TooltipContent>
+        </Tooltip>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

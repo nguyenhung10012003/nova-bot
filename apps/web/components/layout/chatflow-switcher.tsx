@@ -44,7 +44,7 @@ export function ChatflowSwitcher({
       );
       if (chatflow) setActiveChatflow(chatflow);
     } else {
-      setActiveChatflow(chatflows[0]);
+      setActiveChatflow(undefined);
     }
   }, [params.chatflowId]);
 
@@ -95,7 +95,10 @@ export function ChatflowSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onClick={() => router.push('/dashboard/new')}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>

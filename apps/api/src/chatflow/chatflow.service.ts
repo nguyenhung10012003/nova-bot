@@ -45,7 +45,7 @@ export class ChatflowService {
       },
     });
     const flowiseApi = new FlowiseApi({
-      baseUrl: chatflow.baseUrl,
+      baseUrl: chatflow.baseUrl || 'http://localhost:3000',
     });
 
     await flowiseApi.upsertVector({

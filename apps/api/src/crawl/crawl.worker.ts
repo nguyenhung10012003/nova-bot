@@ -1,6 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Source } from '@prisma/client';
 import { Job } from 'bullmq';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,22 +7,17 @@ import { crawl } from 'src/utils/crawler';
 
 @Processor('crawl')
 export class CrawlWorker extends WorkerHost {
-  constructor(
-    private readonly prismaService: PrismaService,
-  ) {
+  constructor(private readonly prismaService: PrismaService) {
     super();
   }
-  async process(
-    job: Job<Source & { refresh?: boolean }>,
-    _token?: string,
-  ): Promise<boolean> {
-    let source = job.data;
-    if(source.type === 'WEBSITE') {
+  async process(job: Job<Source & { refresh?: boolean }>): Promise<boolean> {
+    const source = job.data;
+    if (source.type === 'WEBSITE') {
       return this.processWebSource(source);
-    } 
+    }
   }
 
-  async processWebSource(source: Source & {refresh?: boolean}) {
+  async processWebSource(source: Source & { refresh?: boolean }) {
     const isNewSource = source.sourceStatus === 'CREATED';
     await this.prismaService.source.update({
       where: {
@@ -75,7 +69,7 @@ export class CrawlWorker extends WorkerHost {
             urls: urls.map((url) => ({ url: url.url, type: 'URL' })),
           },
         });
-      } else {
+      } else if (source.urls.length) {
         const urls: {
           url: string;
           content: string;

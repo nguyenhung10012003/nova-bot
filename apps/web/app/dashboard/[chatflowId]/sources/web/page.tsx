@@ -1,4 +1,6 @@
 import { api } from '@/api/api';
+import SourceStatusBadge from '@/components/source/source-status-badge';
+import { UpsertChatflow } from '@/components/source/upsert-chatflow';
 import { WebSourceDialog } from '@/components/source/web-source-dialog';
 import { Badge } from '@nova/ui/components/ui/badge';
 import { Card } from '@nova/ui/components/ui/card';
@@ -34,7 +36,10 @@ export default async function Page({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Website Sources</h1>
-        <WebSourceDialog />
+        <div className="flex gap-2">
+          <UpsertChatflow chatflow={{ id: params.chatflowId }} />
+          <WebSourceDialog />
+        </div>
       </div>
       {websiteSources?.length ? (
         <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
@@ -52,7 +57,7 @@ export default async function Page({
                   {source.rootUrl}
                 </p>
                 <div className="mt-6 flex gap-2">
-                  <Badge variant={'secondary'}>{source.sourceStatus}</Badge>
+                  <SourceStatusBadge status={source.sourceStatus} />
                   <Badge variant={'secondary'}>
                     {source.urls?.length || 0} urls
                   </Badge>

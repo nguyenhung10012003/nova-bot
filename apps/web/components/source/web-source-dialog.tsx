@@ -1,4 +1,5 @@
 'use client';
+import { Source } from '@/@types/source';
 import revalidate from '@/api/action';
 import { api } from '@/api/api';
 import { Button } from '@nova/ui/components/ui/button';
@@ -19,25 +20,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 type WebSourceDialogProps = {
-  source?: {
-    name: string;
-    id: string;
-    type: 'WEBSITE' | 'FILE' | 'TEXT';
-    rootUrl?: string;
-    text?: string;
-    chatflowId: string;
-    urls?: {
-      url: string;
-      type: 'URL' | 'FILE';
-    }[];
-    autoFetch: {
-      cronExpression: string;
-      isEnabled?: boolean;
-      matchPattern?: string;
-      excludePattern?: string;
-      filePattern?: string;
-    };
-  };
+  source?: Source;
   trigger?: React.ReactNode;
 };
 export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
@@ -109,6 +92,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
               name="name"
               placeholder="Example page"
               defaultValue={source?.name}
+              required
             />
           </div>
           <div className="flex flex-col space-y-2">
@@ -119,6 +103,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
               name="url"
               placeholder="https://example.com"
               defaultValue={source?.rootUrl}
+              required
             />
           </div>
           <DialogFooter>

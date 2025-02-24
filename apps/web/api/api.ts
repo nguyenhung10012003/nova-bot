@@ -105,7 +105,7 @@ export class API {
 
   async post<DataType = any, ErrorType = any>(
     url: string,
-    body: any,
+    body?: any,
     init?: RequestInitWithNext,
   ): Promise<ResponseType<DataType, ErrorType>> {
     return this.request<DataType, ErrorType>(url, {
@@ -118,7 +118,7 @@ export class API {
 
   async put<DataType = any, ErrorType = any>(
     url: string,
-    body: any,
+    body?: any,
     init?: RequestInitWithNext,
   ): Promise<ResponseType<DataType, ErrorType>> {
     return this.request<DataType, ErrorType>(url, {
@@ -131,7 +131,7 @@ export class API {
 
   async patch<DataType = any, ErrorType = any>(
     url: string,
-    body: any,
+    body?: any,
     init?: RequestInitWithNext,
   ): Promise<ResponseType<DataType, ErrorType>> {
     return this.request<DataType, ErrorType>(url, {
