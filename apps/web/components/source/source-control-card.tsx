@@ -8,6 +8,7 @@ import {
 } from '@nova/ui/components/ui/card';
 import { FetchSettingDialog } from './fetch-setting-dialog';
 import { ReprocessSource } from './reprocess-source';
+import { AutoFetchDialog } from './auto-fetch-dialog';
 
 type SourceControlCardProps = {
   source: Source;
@@ -22,6 +23,7 @@ export function SourceControlCard({ source }: SourceControlCardProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ReprocessSource source={source} />
           <FetchSettingDialog source={source} />
+          <AutoFetchDialog source={source} />
         </div>
       </CardContent>
     </Card>

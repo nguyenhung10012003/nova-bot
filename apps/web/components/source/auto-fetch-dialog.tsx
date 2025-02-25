@@ -11,28 +11,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@nova/ui/components/ui/dialog';
-import { Input } from '@nova/ui/components/ui/input';
 import { toast } from '@nova/ui/components/ui/sonner';
 import { Switch } from '@nova/ui/components/ui/switch';
-import { Settings } from 'lucide-react';
+import { AlarmClock } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { LabelWithHelp } from '../label-with-help';
+import RecurringTimeSelector from '../recurring-time-selector';
 
-type FetchSettingDialogProps = {
+type AutoFetchDialogProps = {
   source: Source;
 };
-export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
+export function AutoFetchDialog({ source }: AutoFetchDialogProps) {
   const [open, setOpen] = useState(false);
+  const [autoCrawl, setAutoCrawl] = useState(source.fetchSetting?.autoFetch);
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
     const res = await api.patch(`/sources/${source.id}`, {
       data: {
         fetchSetting: {
           ...source.fetchSetting,
-          ...data,
+          autoFetch: autoCrawl,
         },
       },
     });
@@ -44,19 +43,19 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} modal={false}>
       <DialogTrigger asChild>
         <Button
           className="gap-2 w-full h-auto p-4 flex-col"
           variant={'outline'}
         >
-          <Settings className="w-8 h-8" />
-          <span>Crawl Setting</span>
+          <AlarmClock className="w-8 h-8" />
+          <span>Auto crawl</span>
         </Button>
       </DialogTrigger>
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Crawl Setting</DialogTitle>
+          <DialogTitle>Auto crawl</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSave}>
@@ -72,48 +71,16 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Switch id="auto-crawl" name="auto-crawl" />
-            </div>
-            <div className="space-y-2">
-              <LabelWithHelp
-                label="Match pattern"
-                htmlFor="match"
-                explain={
-                  <p className="w-[150px]">
-                    Only fetch urls that match the pattern. The pattern is glob
-                    pattern.
-                  </p>
-                }
+              <Switch
+                id="auto-crawl"
+                name="auto-crawl"
+                checked={autoCrawl}
+                onCheckedChange={setAutoCrawl}
               />
-              <Input type="text" id="match" name="match" />
             </div>
-            <div className="space-y-2">
-              <LabelWithHelp
-                label="Exclude Pattern"
-                htmlFor="exclude"
-                explain={
-                  <p className="w-[150px]">
-                    Exclude urls that match the pattern. The pattern is glob
-                    pattern.
-                  </p>
-                }
-              />
-              <Input type="text" id="exclude" name="exclude" />
-            </div>
-            <div className="space-y-2">
-              <LabelWithHelp
-                label="Max urls to crawl"
-                htmlFor="max-urls"
-                explain={
-                  <p className="w-[150px]">
-                    Maximum number of urls to fetch in one fetch
-                  </p>
-                }
-              />
-              <Input type="number" id="max-urls" min={1} name="max-urls" />
-            </div>
+            {autoCrawl && <RecurringTimeSelector />}
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button onClick={() => setOpen(false)} variant="secondary">
               Cancel
             </Button>
