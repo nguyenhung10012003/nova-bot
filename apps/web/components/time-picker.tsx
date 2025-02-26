@@ -14,7 +14,7 @@ import * as React from 'react';
 interface TimePickerProps {
   className?: string;
   is12HoursFormat?: boolean;
-  onChange?: (value: string) => void;
+  onChange?: (value: {hour: string, minute: string}) => void;
 }
 
 export function TimePicker({
@@ -77,7 +77,7 @@ export function TimePicker({
           hour24 = '00';
         }
       }
-      onChange(`${hour24}:${selectedTime.minute}`);
+      onChange({hour: hour24, minute: selectedTime.minute});
     }
   }, [selectedTime, is12HoursFormat, onChange]);
 

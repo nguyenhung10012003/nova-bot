@@ -116,7 +116,10 @@ export default function RecurringTimeSelector({
       {state.recurrenceType === 'daily' && (
         <div className="space-x-2">
           <Label>Time</Label>
-          <TimePicker is12HoursFormat />
+          <TimePicker is12HoursFormat onChange={(value) => dispatch({
+            type: 'SET_TIME',
+            payload: value,
+          })}/>
         </div>
       )}
 
