@@ -6,9 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@nova/ui/components/ui/card';
+import { UpsertVector } from '../upsert-vector';
+import { AutoFetchDialog } from './auto-fetch-dialog';
 import { FetchSettingDialog } from './fetch-setting-dialog';
 import { ReprocessSource } from './reprocess-source';
-import { AutoFetchDialog } from './auto-fetch-dialog';
+import { DatabaseZap } from 'lucide-react';
 
 type SourceControlCardProps = {
   source: Source;
@@ -24,6 +26,14 @@ export function SourceControlCard({ source }: SourceControlCardProps) {
           <ReprocessSource source={source} />
           <FetchSettingDialog source={source} />
           <AutoFetchDialog source={source} />
+          <UpsertVector
+            className="gap-2 w-full h-auto p-4 flex-col"
+            variant={'outline'}
+            chatflowId={source.chatflowId}
+          >
+            <DatabaseZap className="w-8 h-8" />
+            Upsert Vector
+          </UpsertVector>
         </div>
       </CardContent>
     </Card>

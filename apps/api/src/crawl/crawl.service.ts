@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Source } from '@prisma/client';
 import { Queue } from 'bullmq';
 
@@ -11,6 +11,7 @@ export class CrawlService {
   ) {}
 
   async addCrawlJob(name: string, job: Source & { refresh?: boolean }) {
+    Logger.debug(`Add crawl job for source ${name}`);
     this.crawlQueue.add(name, job);
   }
 }

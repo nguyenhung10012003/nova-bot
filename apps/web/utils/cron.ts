@@ -1,11 +1,14 @@
-type RecurrenceState = {
+export type RecurrenceState = {
   recurrenceType: 'daily' | 'weekly' | 'monthly';
   selectedTime: { hour: string; minute: string };
-  selectedDaysOfWeek: string[];
+  selectedDaysOfWeek: number[];
   selectedDaysOfMonth: number[];
 };
 
-export function generateCronString(recurrence: RecurrenceState): string {
+export function generateCronString(recurrence: RecurrenceState | null): string {
+  if (!recurrence) {
+    return '';
+  }
   const { recurrenceType, selectedTime, selectedDaysOfWeek, selectedDaysOfMonth } = recurrence;
   const { hour, minute } = selectedTime;
   
@@ -14,7 +17,7 @@ export function generateCronString(recurrence: RecurrenceState): string {
       return `${minute} ${hour} * * *`;
     
     case 'weekly':
-      const weekDays = selectedDaysOfWeek.map(day => convertDayToCron(day)).join(',');
+      const weekDays = selectedDaysOfWeek.join(',');
       return `${minute} ${hour} * * ${weekDays || '*'}`;
     
     case 'monthly':
@@ -26,20 +29,10 @@ export function generateCronString(recurrence: RecurrenceState): string {
   }
 }
 
-export function convertDayToCron(day: string): number {
-  const daysMap: Record<string, number> = {
-    'sunday': 0,
-    'monday': 1,
-    'tuesday': 2,
-    'wednesday': 3,
-    'thursday': 4,
-    'friday': 5,
-    'saturday': 6
-  };
-  return daysMap[day.toLowerCase()] ?? -1;
-}
-
-export function parseCronString(cron: string): RecurrenceState {
+export function parseCronString(cron: string): RecurrenceState | null {
+  if (!cron) {
+    return null;
+  }
   const [minute, hour, dayOfMonth, month, dayOfWeek] = cron.split(' ');
 
   if (dayOfMonth !== '*' && dayOfWeek === '*') {
@@ -55,7 +48,7 @@ export function parseCronString(cron: string): RecurrenceState {
     return {
       recurrenceType: 'weekly',
       selectedTime: { hour: hour || "00", minute: minute || "00" },
-      selectedDaysOfWeek: dayOfWeek?.split(',').map(num => convertCronToDay(Number(num))) ?? [],
+      selectedDaysOfWeek: dayOfWeek?.split(',').map(num => Number(num)) ?? [],
       selectedDaysOfMonth: []
     };
   }
@@ -68,15 +61,3 @@ export function parseCronString(cron: string): RecurrenceState {
   };
 }
 
-export function convertCronToDay(num: number): string {
-  const daysMap: Record<number, string> = {
-    0: 'sunday',
-    1: 'monday',
-    2: 'tuesday',
-    3: 'wednesday',
-    4: 'thursday',
-    5: 'friday',
-    6: 'saturday'
-  };
-  return daysMap[num] ?? 'unknown';
-}

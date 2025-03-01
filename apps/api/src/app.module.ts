@@ -1,5 +1,7 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -7,29 +9,33 @@ import { AuthModule } from './auth/auth.module';
 import { ChatflowModule } from './chatflow/chatflow.module';
 import { AccessTokenStrategy } from './common/strategies/access-token.strategy';
 import { RefreshTokenStrategy } from './common/strategies/refresh-token.strategy';
-import { config } from './config';
+import { getConfig } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
-import { BullModule } from '@nestjs/bullmq';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [() => config],
+      load: [getConfig],
     }),
     ScheduleModule.forRoot(),
-    BullModule.forRoot({
-      connection: config.redis,
-      prefix: "nova"
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+          password: configService.get<string>('REDIS_PASSWORD'),
+        },
+      }),
     }),
     EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
     ChatflowModule,
-    SourcesModule
+    SourcesModule,
   ],
   controllers: [AppController],
   providers: [

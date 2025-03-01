@@ -13,7 +13,7 @@ const getSource = async (sourceId: string) => {
   try {
     const response = await api.get(`/sources/${sourceId}`, {
       next: {
-        tags: [`source-${sourceId}`],
+        tags: [`source-${sourceId}`, 'sources'],
       },
     });
     return response;

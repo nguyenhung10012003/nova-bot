@@ -14,11 +14,11 @@ import { CreateChatflowDto } from './chatflow.dto';
 import { ChatflowService } from './chatflow.service';
 
 @Controller('chatflow')
-@UseGuards(AccessTokenGuard)
 export class ChatflowController {
   constructor(private readonly chatflowService: ChatflowService) {}
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   async createChatflow(
     @Body() data: CreateChatflowDto,
     @Req() req: AuthRequest,
@@ -30,26 +30,30 @@ export class ChatflowController {
   }
 
   @Get()
+  @UseGuards(AccessTokenGuard)
   async getChatflows(@Req() req: AuthRequest) {
     return this.chatflowService.getChatflows(req.user.userId);
   }
 
   @Get(':id')
+  @UseGuards(AccessTokenGuard)
   async getChatflow(@Param('id') id: string) {
     return this.chatflowService.getChatflow(id);
   }
 
-  @Get(':id/upsert')
+  @Get(':id/upsert-vector')
+  @UseGuards(AccessTokenGuard)
   async upsertChatflow(@Param('id') id: string) {
     return this.chatflowService.upsertChatflow(id);
   }
 
-  @Get(':id/upsert-callback')
+  @Get(':id/upsert-vector-callback')
   async upsertChatflowCallback(@Param('id') id: string) {
     return this.chatflowService.upsertChatflowCallback(id);
   }
 
   @Patch(':id')
+  @UseGuards(AccessTokenGuard)
   async updateChatflow(
     @Param('id') id: string,
     @Body() data: Partial<CreateChatflowDto>,
@@ -58,6 +62,7 @@ export class ChatflowController {
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
   async deleteChatflow(@Param('id') id: string) {
     return this.chatflowService.deleteChatflow(id);
   }

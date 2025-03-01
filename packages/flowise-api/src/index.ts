@@ -154,6 +154,10 @@ export class FlowiseApi
   }
 
   private async sendRequest<T>(url: string, options: RequestInit): Promise<T> {
+    if (!options.headers) {
+      options.headers = {};
+    }
+    
     if (this.apiKey) {
       (options.headers as Record<string, string>)['Authorization'] =
         `Bearer ${this.apiKey}`;
@@ -168,7 +172,7 @@ export class FlowiseApi
       const resp = await response.json();
       return resp as T;
     } catch (error) {
-      throw new Error('Error sending request');
+      throw new Error(String(error));
     }
   }
 }

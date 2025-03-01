@@ -41,7 +41,7 @@ export class ChatflowService {
   async upsertChatflow(chatflowId: string) {
     const chatflow = await this.prisma.chatflow.findUnique({
       where: {
-        chatflowId: chatflowId,
+        id: chatflowId,
       },
     });
     const flowiseApi = new FlowiseApi({

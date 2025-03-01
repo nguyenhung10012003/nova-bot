@@ -48,9 +48,9 @@ export default function DeleteSource({ source }: DeleteSourceProps) {
       <AlertDialogTrigger>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant={'destructive'} size="icon">
+            <div className={'h-10 aspect-square p-2 bg-destructive hover:bg-destructive/80 rounded-md text-destructive-foreground'}>
               <Trash />
-            </Button>
+            </div>
           </TooltipTrigger>
           <TooltipContent>Delete</TooltipContent>
         </Tooltip>

@@ -1,6 +1,11 @@
 'use client';
 import { Source } from '@/@types/source';
 import { api } from '@/api/api';
+import {
+  generateCronString,
+  parseCronString,
+  RecurrenceState,
+} from '@/utils/cron';
 import { Button } from '@nova/ui/components/ui/button';
 import {
   Dialog,
@@ -17,6 +22,7 @@ import { AlarmClock } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { LabelWithHelp } from '../label-with-help';
 import RecurringTimeSelector from '../recurring-time-selector';
+import revalidate from '@/api/action';
 
 type AutoFetchDialogProps = {
   source: Source;
@@ -24,19 +30,22 @@ type AutoFetchDialogProps = {
 export function AutoFetchDialog({ source }: AutoFetchDialogProps) {
   const [open, setOpen] = useState(false);
   const [autoCrawl, setAutoCrawl] = useState(source.fetchSetting?.autoFetch);
+  const [recurrence, setRecurrence] = useState<RecurrenceState | null>(
+    parseCronString(source.fetchSetting?.cronExpression || ''),
+  );
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const res = await api.patch(`/sources/${source.id}`, {
-      data: {
-        fetchSetting: {
-          ...source.fetchSetting,
-          autoFetch: autoCrawl,
-        },
+      fetchSetting: {
+        ...source.fetchSetting,
+        autoFetch: autoCrawl,
+        cronExpression: autoCrawl ? generateCronString(recurrence) : undefined,
       },
     });
     if (res.error) toast.error("Can't save setting");
     else {
+      revalidate(`source-${source.id}`);
       toast.success('Save successfully');
       setOpen(false);
     }
@@ -78,10 +87,19 @@ export function AutoFetchDialog({ source }: AutoFetchDialogProps) {
                 onCheckedChange={setAutoCrawl}
               />
             </div>
-            {autoCrawl && <RecurringTimeSelector />}
+            {autoCrawl && (
+              <RecurringTimeSelector
+                value={recurrence}
+                onChange={setRecurrence}
+              />
+            )}
           </div>
           <DialogFooter className="mt-4">
-            <Button onClick={() => setOpen(false)} variant="secondary">
+            <Button
+              onClick={() => setOpen(false)}
+              type="button"
+              variant="secondary"
+            >
               Cancel
             </Button>
             <Button type="submit">Save</Button>

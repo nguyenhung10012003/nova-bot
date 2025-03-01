@@ -182,7 +182,14 @@ api.interceptors.request.use(async (config) => {
 });
 
 api.interceptors.response.use(
-  async (response) => response.json(),
+  async (response) => {
+    if (response.headers.get('content-length') === '0') {
+      return {
+        error: null,
+      };
+    }
+    return response.json()
+  },
   async (error) => {
     console.error('Error fetch: ', error);
     if (error.status === 401) {

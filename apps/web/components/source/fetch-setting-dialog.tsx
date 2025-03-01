@@ -1,5 +1,6 @@
 'use client';
 import { Source } from '@/@types/source';
+import revalidate from '@/api/action';
 import { api } from '@/api/api';
 import { Button } from '@nova/ui/components/ui/button';
 import {
@@ -13,7 +14,6 @@ import {
 } from '@nova/ui/components/ui/dialog';
 import { Input } from '@nova/ui/components/ui/input';
 import { toast } from '@nova/ui/components/ui/sonner';
-import { Switch } from '@nova/ui/components/ui/switch';
 import { Settings } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { LabelWithHelp } from '../label-with-help';
@@ -29,15 +29,16 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
     const res = await api.patch(`/sources/${source.id}`, {
-      data: {
-        fetchSetting: {
-          ...source.fetchSetting,
-          ...data,
-        },
+      fetchSetting: {
+        ...source.fetchSetting,
+        maxUrlsToCrawl: data.maxUrls
+          ? parseInt(data.maxUrls as string)
+          : undefined,
       },
     });
     if (res.error) toast.error("Can't save setting");
     else {
+      revalidate(`source-${source.id}`);
       toast.success('Save successfully');
       setOpen(false);
     }
@@ -61,19 +62,6 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSave}>
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <LabelWithHelp
-                label="Auto crawl"
-                htmlFor="auto-crawl"
-                explain={
-                  <p className="w-[150px]">
-                    Automatically fetch new data from urls and reprocess after a
-                    range of time
-                  </p>
-                }
-              />
-              <Switch id="auto-crawl" name="auto-crawl" />
-            </div>
             <div className="space-y-2">
               <LabelWithHelp
                 label="Match pattern"
@@ -85,7 +73,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Input type="text" id="match" name="match" />
+              <Input type="text" id="match" name="match" defaultValue={source.fetchSetting?.matchPattern} />
             </div>
             <div className="space-y-2">
               <LabelWithHelp
@@ -98,7 +86,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Input type="text" id="exclude" name="exclude" />
+              <Input type="text" id="exclude" name="exclude" defaultValue={source.fetchSetting?.excludePattern}/>
             </div>
             <div className="space-y-2">
               <LabelWithHelp
@@ -110,11 +98,15 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Input type="number" id="max-urls" min={1} name="max-urls" />
+              <Input type="number" id="max-urls" min={1} name="maxUrls" defaultValue={source.fetchSetting?.maxUrlsToCrawl} />
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={() => setOpen(false)} variant="secondary">
+          <DialogFooter className="mt-4">
+            <Button
+              onClick={() => setOpen(false)}
+              type="button"
+              variant="secondary"
+            >
               Cancel
             </Button>
             <Button type="submit">Save</Button>

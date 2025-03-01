@@ -44,7 +44,7 @@ export function UrlList({ urls }: UrlListProps) {
     }
   };
   return (
-    <Accordion type="multiple" className="w-full">
+    <Accordion type="multiple" className="w-full" defaultValue={['selected-files', 'included-files']}>
       <AccordionItem value={'selected-files'}>
         <AccordionTrigger className="w-full text-lg font-semibold text-foreground">
           Web Urls

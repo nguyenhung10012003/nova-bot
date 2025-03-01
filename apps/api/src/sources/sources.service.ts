@@ -43,10 +43,20 @@ export class SourcesService {
   async updateSource(id: string, data: Partial<CreateSourceDto>) {
     const source = await this.prisma.source.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        fetchSetting: data.fetchSetting
+          ? {
+              upsert: {
+                set: data.fetchSetting,
+                update: data.fetchSetting,
+              },
+            }
+          : undefined,
+      },
     });
 
-    if (source.type === 'WEBSITE') {
+    if (source.type === 'WEBSITE' && (data.urls || data.rootUrl)) {
       await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
     }
 

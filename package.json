@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:packages": "yarn build --filter=@nova/utils --filter=@nova/flowise-api",
     "prisma:generate": "yarn workspace api prisma:generate",
     "db:push": "yarn workspace api db:push",
     "test": "turbo test",

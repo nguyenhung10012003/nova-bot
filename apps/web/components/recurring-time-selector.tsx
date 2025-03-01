@@ -5,8 +5,9 @@ import { Checkbox } from '@nova/ui/components/ui/checkbox';
 import { Label } from '@nova/ui/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@nova/ui/components/ui/radio-group';
 import { cn } from '@nova/ui/lib/utils';
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { TimePicker } from './time-picker';
+import { RecurrenceState } from '@/utils/cron';
 
 const DAYS_OF_WEEK = [
   'Sunday',
@@ -25,17 +26,10 @@ const MINUTES = Array.from({ length: 60 }, (_, i) =>
 );
 const DAYS_OF_MONTH = Array.from({ length: 31 }, (_, i) => i + 1);
 
-type RecurrenceState = {
-  recurrenceType: 'daily' | 'weekly' | 'monthly';
-  selectedTime: { hour: string; minute: string };
-  selectedDaysOfWeek: string[];
-  selectedDaysOfMonth: number[];
-};
-
 type RecurrenceAction =
   | { type: 'SET_RECURRENCE'; payload: 'daily' | 'weekly' | 'monthly' }
   | { type: 'SET_TIME'; payload: { hour?: string; minute?: string } }
-  | { type: 'TOGGLE_DAY_OF_WEEK'; payload: string }
+  | { type: 'TOGGLE_DAY_OF_WEEK'; payload: number }
   | { type: 'TOGGLE_DAY_OF_MONTH'; payload: number };
 
 const initialState = {
@@ -77,7 +71,7 @@ function reducer(
 }
 
 type RecurringTimeSelectorProps = {
-  value?: RecurrenceState;
+  value?: RecurrenceState | null;
   onChange?: (value: RecurrenceState) => void;
 } & Omit<React.ComponentProps<'div'>, 'onChange'>;
 
@@ -88,12 +82,18 @@ export default function RecurringTimeSelector({
 }: RecurringTimeSelectorProps) {
   const [state, dispatch] = useReducer(reducer, value || initialState);
 
+  useEffect(() => {
+    if (onChange) {
+      onChange(state);
+    }
+  }, [state, onChange]);
+
   return (
     <div className={cn('space-y-6', className)}>
       <div className="space-y-2">
         <Label>Recurrence</Label>
         <RadioGroup
-          defaultValue="daily"
+          value={state.recurrenceType} // Use value instead of defaultValue
           onValueChange={(value) =>
             dispatch({
               type: 'SET_RECURRENCE',
@@ -116,10 +116,17 @@ export default function RecurringTimeSelector({
       {state.recurrenceType === 'daily' && (
         <div className="space-x-2">
           <Label>Time</Label>
-          <TimePicker is12HoursFormat onChange={(value) => dispatch({
-            type: 'SET_TIME',
-            payload: value,
-          })}/>
+          <TimePicker
+            is12HoursFormat
+            onChange={(value) => {
+              if (
+                value.hour !== state.selectedTime.hour ||
+                value.minute !== state.selectedTime.minute
+              ) {
+                dispatch({ type: 'SET_TIME', payload: value });
+              }
+            }}
+          />
         </div>
       )}
 
@@ -127,18 +134,18 @@ export default function RecurringTimeSelector({
         <div className="space-y-2">
           <Label>Days of Week</Label>
           <div className="flex flex-wrap gap-2">
-            {DAYS_OF_WEEK.map((day) => (
+            {DAYS_OF_WEEK.map((day, index) => (
               <Badge
                 key={day}
                 role="checkbox"
-                aria-checked={state.selectedDaysOfWeek.includes(day)}
+                aria-checked={state.selectedDaysOfWeek.includes(index)}
                 tabIndex={0}
                 variant={
-                  state.selectedDaysOfWeek.includes(day) ? 'default' : 'outline'
+                  state.selectedDaysOfWeek.includes(index) ? 'default' : 'outline'
                 }
                 className="cursor-pointer hover:opacity-80 transition-all"
                 onClick={() =>
-                  dispatch({ type: 'TOGGLE_DAY_OF_WEEK', payload: day })
+                  dispatch({ type: 'TOGGLE_DAY_OF_WEEK', payload: index })
                 }
               >
                 {day}
@@ -179,7 +186,7 @@ export default function RecurringTimeSelector({
         )}
         {state.recurrenceType === 'weekly' &&
           state.selectedDaysOfWeek.length > 0 && (
-            <p>Occurs weekly on {state.selectedDaysOfWeek.join(', ')}</p>
+            <p>Occurs weekly on {state.selectedDaysOfWeek.map((day) => DAYS_OF_WEEK[day]).join(', ')}</p>
           )}
         {state.recurrenceType === 'monthly' &&
           state.selectedDaysOfMonth.length > 0 && (

@@ -1,5 +1,6 @@
 'use client';
 import { Source } from '@/@types/source';
+import revalidate from '@/api/action';
 import { api } from '@/api/api';
 import { Button } from '@nova/ui/components/ui/button';
 import { toast } from '@nova/ui/components/ui/sonner';
@@ -18,6 +19,7 @@ export function ReprocessSource(props: ReprocessSourceProps) {
     if (res.error) {
       toast.error('Failed to reprocess source');
     } else {
+      revalidate(`source-${props.source.id}`);
       toast.success('Source reprocessed');
     }
     setLoading(false);

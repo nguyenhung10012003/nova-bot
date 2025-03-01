@@ -8,9 +8,4 @@ export class AppController {
   async ping() {
     return 'pong!';
   }
-
-  @Get('upsert')
-  async upsertChatflow() {
-    // return this.appService.upsertChatflow();
-  }
 }

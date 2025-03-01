@@ -8,11 +8,12 @@ export class CreateSourceDto {
     url: string;
     type: 'URL' | 'FILE';
   }[];
-  autoFetch?: {
+  fetchSetting?: {
     cronExpression: string;
-    isEnabled?: boolean;
+    autoFetch?: boolean;
     matchPattern?: string;
     excludePattern?: string;
     filePattern?: string;
+    maxUrlsToCrawl?: number;
   };
 }
