@@ -5,6 +5,30 @@ import { Button } from '@nova/ui/components/ui/button';
 import { Clipboard, ClipboardCheck, ThumbsDown, ThumbsUp } from 'lucide-react';
 import Markdown from 'react-markdown';
 
+import { motion } from "framer-motion";
+
+export const ChatBubbleTyping = () => {
+  return (
+    <div className="flex items-center gap-2 rounded-xl px-3 py-3 w-fit bg-secondary text-secondary-foreground self-start">
+      <div className="flex gap-1">
+        {[0, 1, 2].map((index) => (
+          <motion.span
+            key={index}
+            className="w-2 h-2 bg-gray-500 rounded-full"
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.2,
+              ease: "easeInOut",
+              delay: index * 0.2,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 type ChatBubbleProps = {
   message: ChatMessage;
   index?: number;
@@ -29,7 +53,7 @@ export default function ChatBubble({ message, setRef, index }: ChatBubbleProps) 
     >
       <div className="flex max-w-[80%] flex-col gap-0.5 group">
         <div
-          className={`rounded-xl px-3 py-2 ${message.recipientType === 'USER' ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground'}`}
+          className={`rounded-xl px-3 py-2 ${message.recipientType === 'USER' ? 'bg-secondary text-secondary-foreground self-start' : 'bg-primary text-primary-foreground self-end'}`}
         >
           <Markdown>{message.message}</Markdown>
         </div>

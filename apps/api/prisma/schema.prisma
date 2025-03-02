@@ -34,17 +34,18 @@ model User {
 }
 
 model Chatflow {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  chatflowId String   @unique
-  apiKey     String?
-  baseUrl    String?
-  userId     String   @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sources    Source[]
-  documents Document[]
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  chatflowId   String        @unique
+  apiKey       String?
+  baseUrl      String?
+  userId       String        @db.ObjectId
+  user         User          @relation(fields: [userId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sources      Source[]
+  documents    Document[]
+  chatSessions ChatSession[]
 }
 
 enum SourceType {
@@ -97,4 +98,47 @@ model Source {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   documents    Document[]
+}
+
+model ChatSession {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String?
+  chatflowId  String        @db.ObjectId
+  chatflow    Chatflow      @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  chatMessage ChatMessage[]
+}
+
+enum ChatMessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
+enum ChatMessageStatus {
+  CREATED
+  SENT
+  DELIVERED
+  READ
+}
+
+enum ChatMessageRecipientType {
+  USER
+  BOT
+}
+
+model ChatMessage {
+  id            String                   @id @default(auto()) @map("_id") @db.ObjectId
+  chatSessionId String                   @db.ObjectId
+  chatSession   ChatSession              @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  type          ChatMessageType
+  status        ChatMessageStatus        @default(CREATED)
+  recipientType ChatMessageRecipientType
+  message       String?
+  file          String[]
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
 }

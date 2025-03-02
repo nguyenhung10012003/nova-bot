@@ -13,6 +13,7 @@ import { getConfig } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SourcesModule } from './sources/sources.module';
     AuthModule,
     ChatflowModule,
     SourcesModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [

@@ -1,5 +1,7 @@
 'use client';
 import { ChatSession } from '@/@types/chat';
+import revalidate from '@/api/action';
+import { api } from '@/api/api';
 import { Button } from '@nova/ui/components/ui/button';
 import { Input } from '@nova/ui/components/ui/input';
 import { ScrollArea } from '@nova/ui/components/ui/scroll-area';
@@ -11,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@nova/ui/components/ui/sheet';
+import { toast } from '@nova/ui/components/ui/sonner';
 import {
   Tooltip,
   TooltipContent,
@@ -21,116 +24,14 @@ import { useParams, useRouter } from 'next/navigation';
 
 type ChatHeaderProps = {
   title?: string;
+  chatSessions: ChatSession[];
 };
 
-const demoChatSessions: ChatSession[] = [
-  {
-    id: '1',
-    title: 'Chat with Alice',
-    createdAt: new Date('2023-01-01T10:00:00Z'),
-  },
-  {
-    id: '2',
-    title: 'Project discussion',
-    createdAt: new Date('2023-02-15T14:30:00Z'),
-  },
-  {
-    id: '3',
-    title: 'Support chat',
-    createdAt: new Date('2023-03-20T09:45:00Z'),
-  },
-  {
-    id: '4',
-    title: 'Team meeting',
-    createdAt: new Date('2023-04-10T11:00:00Z'),
-  },
-  {
-    id: '5',
-    title: 'Client call',
-    createdAt: new Date('2023-05-05T16:00:00Z'),
-  },
-  {
-    id: '6',
-    title: 'Brainstorming session',
-    createdAt: new Date('2023-06-01T10:00:00Z'),
-  },
-  {
-    id: '7',
-    title: 'Weekly sync',
-    createdAt: new Date('2023-06-08T11:00:00Z'),
-  },
-  {
-    id: '8',
-    title: 'One-on-one',
-    createdAt: new Date('2023-06-15T14:00:00Z'),
-  },
-  {
-    id: '9',
-    title: 'Design review',
-    createdAt: new Date('2023-06-22T15:00:00Z'),
-  },
-  {
-    id: '10',
-    title: 'Code review',
-    createdAt: new Date('2023-06-29T16:00:00Z'),
-  },
-  {
-    id: '11',
-    title: 'Sprint planning',
-    createdAt: new Date('2023-07-06T10:00:00Z'),
-  },
-  {
-    id: '12',
-    title: 'Retrospective',
-    createdAt: new Date('2023-07-13T11:00:00Z'),
-  },
-  {
-    id: '13',
-    title: 'Client feedback',
-    createdAt: new Date('2023-07-20T14:00:00Z'),
-  },
-  {
-    id: '14',
-    title: 'Product demo',
-    createdAt: new Date('2023-07-27T15:00:00Z'),
-  },
-  {
-    id: '15',
-    title: 'Team building',
-    createdAt: new Date('2023-08-03T16:00:00Z'),
-  },
-  {
-    id: '16',
-    title: 'Marketing strategy',
-    createdAt: new Date('2023-08-10T10:00:00Z'),
-  },
-  {
-    id: '17',
-    title: 'Sales call',
-    createdAt: new Date('2023-08-17T11:00:00Z'),
-  },
-  {
-    id: '18',
-    title: 'Tech talk',
-    createdAt: new Date('2023-08-24T14:00:00Z'),
-  },
-  {
-    id: '19',
-    title: 'Customer support',
-    createdAt: new Date('2023-08-31T15:00:00Z'),
-  },
-  {
-    id: '20',
-    title: 'Investor meeting',
-    createdAt: new Date('2023-09-07T16:00:00Z'),
-  },
-];
-
-export function ChatHeader({ title }: ChatHeaderProps) {
+export function ChatHeader({ title, chatSessions }: ChatHeaderProps) {
   const router = useRouter();
-  const { chatflowId, sessionId } = useParams<{
+  const { chatflowId, chatSessionId } = useParams<{
     chatflowId: string;
-    sessionId: string;
+    chatSessionId: string;
   }>();
 
   const handleNewSession = async () => {
@@ -139,7 +40,14 @@ export function ChatHeader({ title }: ChatHeaderProps) {
 
   const handleDeleteSession = async (id?: string) => {
     if (!id) return;
-    if (id === sessionId) {
+    const res = await api.delete(`/chat-session/${id}`);
+    if (!res.error) {
+      revalidate('chat-sessions');
+      toast.success('Chat session deleted successfully');
+    } else {
+      toast.error('Failed to delete chat session');
+    }
+    if (id === chatSessionId) {
       router.push(`/dashboard/${chatflowId}/playground`);
     }
   };
@@ -167,8 +75,8 @@ export function ChatHeader({ title }: ChatHeaderProps) {
             <TooltipContent>See chat histories</TooltipContent>
           </Tooltip>
         </SheetTrigger>
-        <SheetContent side="right" className='p-0'>
-          <SheetHeader className='p-4'>
+        <SheetContent side="right" className="p-0 flex flex-col gap-0">
+          <SheetHeader className="p-4">
             <SheetTitle>Chat histories</SheetTitle>
             <SheetDescription />
             <div className="border-b border-dashed pb-4 relative flex items-center">
@@ -179,12 +87,12 @@ export function ChatHeader({ title }: ChatHeaderProps) {
               <Search className="absolute right-4 text-muted-foreground" />
             </div>
           </SheetHeader>
-          <ScrollArea className='px-4 h-full'>
+          <ScrollArea className="px-4 h-full pb-4">
             <div className="flex flex-col gap-1 mt-4">
-              {demoChatSessions.map((session, index) => (
+              {chatSessions.map((session, index) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-between hover:bg-muted px-4 py-2 rounded-lg cursor-pointer group transition-colors ${session.id === sessionId ? 'bg-muted' : ''}`}
+                  className={`flex items-center justify-between hover:bg-muted px-4 py-2 rounded-lg cursor-pointer group transition-colors ${session.id === chatSessionId ? 'bg-muted' : ''}`}
                 >
                   <div
                     onClick={() =>
@@ -194,10 +102,10 @@ export function ChatHeader({ title }: ChatHeaderProps) {
                     }
                     className="flex-1 h-7 items-center flex"
                   >
-                    {session.title}
+                    <span className='line-clamp-1'>{session.title || 'Untitled'}</span>
                   </div>
                   <Button
-                    className="group-hover:flex hidden opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    className="group-hover:visible flex invisible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     variant="destructive"
                     onClick={() => handleDeleteSession(session.id)}
                     size={'tiny'}
