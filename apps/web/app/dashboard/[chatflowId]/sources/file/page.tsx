@@ -31,7 +31,9 @@ export default function Page() {
                 Selected files
               </AccordionTrigger>
               <AccordionContent>
-                <Source name="File 1" onDelete={() => {}} link="fds"></Source>
+                {Array.from({ length: 50 }, (_, index) => (
+                  <Source key={index} name={`File ${index + 1}`} onDelete={() => {}} link={`link-${index}`} />
+                ))}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value={'included-files'}>
