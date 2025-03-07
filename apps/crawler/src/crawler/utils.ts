@@ -130,3 +130,51 @@ export function getFileUrls(
     { extensionMatch, baseUrl }
   );
 }
+
+export /**
+* Kiểm tra xem một URL có phải là URL của file hay không (không tính .html)
+* @param url - Đường dẫn URL cần kiểm tra
+* @returns Boolean cho biết URL có phải URL của file hay không
+*/
+function isFileUrl(url: string): boolean {
+   try {
+       // Kiểm tra URL có hợp lệ không
+       const parsedUrl = new URL(url);
+       
+       // Lấy phần path của URL
+       const path = parsedUrl.pathname;
+       
+       // Kiểm tra xem path có phần mở rộng file hợp lệ không (trừ .html)
+       const fileExtensionRegex = /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
+       return fileExtensionRegex.test(path);
+   } catch (error) {
+       // Nếu URL không hợp lệ, trả về false
+       return false;
+   }
+}
+
+/**
+ * Lấy phần mở rộng của file từ một URL hoặc đường dẫn file
+ * @param path - Đường dẫn file hoặc URL
+ * @returns Phần mở rộng file (không có dấu chấm) hoặc chuỗi rỗng nếu không có extension
+ */
+export function getFileExtension(path: string): string {
+  try {
+      // Loại bỏ các query params và fragment
+      const cleanPath = path.split('?')[0].split('#')[0];
+      
+      // Lấy tên file từ path
+      const fileName = cleanPath.split('/').pop() || '';
+      
+      // Regex kiểm tra phần mở rộng file
+      const fileExtensionRegex = /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
+      
+      // Nếu không match với regex, trả về chuỗi rỗng
+      if (!fileExtensionRegex.test(fileName.toLowerCase())) return '';
+      
+      // Lấy phần mở rộng (không bao gồm dấu chấm)
+      return fileName.split('.').pop()?.toLowerCase() || '';
+  } catch (error) {
+      return '';
+  }
+}

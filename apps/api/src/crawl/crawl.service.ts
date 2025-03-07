@@ -12,6 +12,6 @@ export class CrawlService {
 
   async addCrawlJob(name: string, job: Source & { refresh?: boolean }) {
     Logger.debug(`Add crawl job for source ${name}`);
-    this.crawlQueue.add(name, job);
+    this.crawlQueue.add(name, job, {removeOnComplete: true});
   }
 }

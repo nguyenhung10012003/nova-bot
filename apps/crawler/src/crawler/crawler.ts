@@ -1,12 +1,15 @@
 import { minimatch } from 'minimatch';
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { Observable, Subject } from 'rxjs';
 import {
+  getFileExtension,
   getFileUrls,
   getPageHtml,
   isUrlInCollection,
   normalizeUrl,
   waitForXPath,
 } from './utils';
+import path from 'path';
 
 export type RequestHandler = (
   page: Page,
@@ -140,9 +143,10 @@ export interface CrawlOptions {
   maxUrlsToCrawl?: number;
   maxConcurrencies?: number;
   file?: {
-    extensionMatch: string;
+    extensionMatch: string | string[];
   };
 }
+
 
 export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
   const dataset: T[] = [];
@@ -168,14 +172,16 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
         const anchorElements = Array.from(document.querySelectorAll('a'));
         return anchorElements.map((a) => {
           const href = (a as HTMLAnchorElement).href;
-          return href.startsWith('/')
-            ? new URL(href, window.location.origin).href
-            : href;
+          if (href.startsWith('tel:') || href.startsWith('mailto:') ) {
+            return "";
+          }
+          return new URL(href, window.location.origin).href
         });
       });
 
       if (options.match) {
         const filteredUrls = urls.filter((link) => {
+          if (!link) return false;
           if (Array.isArray(options.match)) {
             return options.match.some((pattern) => minimatch(link, pattern));
           } else {
@@ -194,15 +200,8 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
         options.selector,
         options.ignoreSelector,
       );
-      const fileUrls = options.file
-        ? await getFileUrls(
-            page,
-            options.file.extensionMatch,
-            new URL(url).hostname,
-          )
-        : [];
 
-      dataset.push({ url, title, content, fileUrls } as T);
+      dataset.push({ url, title, content} as T);
     },
     maxUrlsToCrawl: options.maxUrlsToCrawl,
     maxConcurrencies: options.maxConcurrencies,
@@ -210,4 +209,122 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
 
   await crawler.start(options.urls);
   return dataset;
+}
+
+export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
+  const dataSubject = new Subject<T>();
+
+  const crawler = new Crawler({
+    requestHandler: async (page, url, push) => {
+      try {
+        // Kiểm tra nếu URL là file
+        const fileExtension = getFileExtension(url);
+        
+        if (fileExtension) {
+          if (options.file && options.file.extensionMatch) {
+            // Kiểm tra extension file có match không
+            const isFileMatch = Array.isArray(options.file.extensionMatch)
+              ? options.file.extensionMatch.some(ext => minimatch(url, ext))
+              : minimatch(url, options.file.extensionMatch);
+  
+            if (isFileMatch) {
+              // Nếu match, emit data file và bỏ qua xử lý tiếp
+              dataSubject.next({ 
+                url, 
+                type: 'FILE', 
+                extension: fileExtension 
+              } as T);
+              return;
+            }
+          } else {
+            return;
+          }
+        }
+
+        // Nếu không phải file, tiếp tục xử lý web page
+        // Wait for the selector to appear on the page
+        if (options.selector) {
+          if (options.selector.startsWith('/')) {
+            await waitForXPath(
+              page,
+              options.selector,
+              options.waitForSelectorTimeout ?? 1000,
+            );
+          } else {
+            await page.waitForSelector(options.selector, {
+              timeout: options.waitForSelectorTimeout ?? 1000,
+            });
+          }
+        }
+
+        // Get all the links on the page
+        const urls = await page.evaluate(() => {
+          const anchorElements = Array.from(document.querySelectorAll('a'));
+          return anchorElements.map((a) => {
+            const href = (a as HTMLAnchorElement).href;
+            if (href.startsWith('tel:') || href.startsWith('mailto:') ) {
+              return "";
+            }
+            return new URL(href, window.location.origin).href
+          });
+        });
+
+        let filteredUrls = urls;
+        if (options.match) {
+          filteredUrls = urls.filter((link) => {
+            if (!link) return false;
+            if (Array.isArray(options.match)) {
+              return options.match.some((pattern) => minimatch(link, pattern));
+            } else {
+              return minimatch(link, options.match);
+            }
+          });
+          push(filteredUrls);
+        }
+
+        // Get the page title and content
+        const title = await page.title();
+        const content = await getPageHtml(
+          page,
+          options.selector,
+          options.ignoreSelector,
+        );
+
+        // Emit data page
+        dataSubject.next({ url, title, content } as T);
+      } catch (error) {
+        // Optionally emit errors through the subject
+        dataSubject.error(error);
+      }
+    },
+    maxUrlsToCrawl: options.maxUrlsToCrawl,
+    maxConcurrencies: options.maxConcurrencies,
+  });
+
+  // Start crawling and handle completion
+  crawler.start(options.urls)
+    .then(() => dataSubject.complete())
+    .catch((error) => dataSubject.error(error));
+
+  return dataSubject.asObservable();
+}
+
+// Hàm hỗ trợ sử dụng
+export function useCrawlStream<T = any>(options: CrawlOptions) {
+  const crawlObservable = crawlStream<T>(options);
+
+  crawlObservable.subscribe({
+    next: (data) => {
+      console.log('Crawled data:', data);
+      // Xử lý từng phần dữ liệu khi nhận được
+    },
+    error: (error) => {
+      console.error('Crawl error:', error);
+    },
+    complete: () => {
+      console.log('Crawling completed');
+    }
+  });
+
+  return crawlObservable;
 }
