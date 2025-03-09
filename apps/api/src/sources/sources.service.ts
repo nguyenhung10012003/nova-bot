@@ -71,7 +71,10 @@ export class SourcesService {
     if (!source) {
       throw new Error('Source not found');
     }
-    await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, {...source, refresh: true});
+    await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, {
+      ...source,
+      refresh: true,
+    });
     return source;
   }
 

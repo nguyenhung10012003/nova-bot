@@ -150,14 +150,20 @@ enum IntegrationType {
   TELEGRAM
 }
 
+enum IntegrationStatus {
+  ENABLED
+  DISABLED
+}
+
 model Integration {
-  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
   name        String?
   accessToken String?
-  pageId      String          @unique
+  pageId      String            @unique
   type        IntegrationType
-  chatflowId  String          @db.ObjectId
-  chatflow    Chatflow        @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  status      IntegrationStatus @default(ENABLED)
+  chatflowId  String            @db.ObjectId
+  chatflow    Chatflow          @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }

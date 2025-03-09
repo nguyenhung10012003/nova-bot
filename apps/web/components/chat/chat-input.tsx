@@ -68,6 +68,7 @@ const ChatInput: React.FC = ({
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.nativeEvent.isComposing) return; // Tránh gửi tin nhắn khi đang gõ bộ gõ IME
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSendMessage();
@@ -80,7 +81,7 @@ const ChatInput: React.FC = ({
         ref={textareaRef}
         value={text}
         onChange={handleChange}
-        onKeyDownCapture={handleKeyDown}
+        onKeyDown={handleKeyDown}
         placeholder="Ask a follow up..."
         className="w-full resize-none bg-transparent text-foreground text-sm outline-none p-3 pb-1.5 rounded-xl overflow-hidden"
         rows={1}

@@ -1,4 +1,5 @@
 import { RegisterForm } from './register-form';
+import Image from 'next/image';
 
 export default function RegisterPage() {
   return (
@@ -10,11 +11,13 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
-      <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/placeholder.svg"
+      <div className="relative hidden bg-muted lg:flex items-center justify-center">
+        <Image
+          src="/images/login.png"
           alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="inset-0 h-auto w-full max-w-[400px] object-contain dark:brightness-[0.2] dark:grayscale"
+          width={500}
+          height={500}
         />
       </div>
     </div>

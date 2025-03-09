@@ -15,7 +15,7 @@ import {
   useSidebar,
 } from '@nova/ui/components/ui/sidebar';
 import { ChevronsUpDown, Plus, Workflow } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 export function ChatflowSwitcher({
@@ -31,10 +31,15 @@ export function ChatflowSwitcher({
   const [activeChatflow, setActiveChatflow] = React.useState(chatflows[0]);
   const router = useRouter();
   const params = useParams<{ chatflowId: string }>();
+  const path = usePathname();
 
   const handleChatflowChange = (chatflow: { name: string; id: string }) => {
     setActiveChatflow(chatflow);
-    router.push(`/dashboard/${chatflow.id}`);
+    const newPath = path.replace(
+      /\/dashboard\/[^/]+/,
+      `/dashboard/${chatflow.id}`,
+    );
+    router.push(newPath);
   };
 
   React.useEffect(() => {

@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@nova/ui/components/ui/alert';
 import { Button } from '@nova/ui/components/ui/button';
 import { Input } from '@nova/ui/components/ui/input';
 import { Label } from '@nova/ui/components/ui/label';
+import { toast } from '@nova/ui/components/ui/sonner';
 import { cn } from '@nova/ui/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -31,6 +32,7 @@ export function LoginForm({
       const response = await api.post('/auth/login', { email, password });
       setAuth(response);
       router.push('/dashboard'); // Redirect to dashboard on successful sign-in
+      toast.success('Welcome back!');
     } catch (error) {
       console.error(error);
       setSubmitError('An error occurred. Please try again.');

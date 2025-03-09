@@ -147,7 +147,6 @@ export interface CrawlOptions {
   };
 }
 
-
 export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
   const dataset: T[] = [];
   const crawler = new Crawler({
@@ -172,10 +171,10 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
         const anchorElements = Array.from(document.querySelectorAll('a'));
         return anchorElements.map((a) => {
           const href = (a as HTMLAnchorElement).href;
-          if (href.startsWith('tel:') || href.startsWith('mailto:') ) {
-            return "";
+          if (href.startsWith('tel:') || href.startsWith('mailto:')) {
+            return '';
           }
-          return new URL(href, window.location.origin).href
+          return new URL(href, window.location.origin).href;
         });
       });
 
@@ -201,7 +200,7 @@ export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
         options.ignoreSelector,
       );
 
-      dataset.push({ url, title, content} as T);
+      dataset.push({ url, title, content } as T);
     },
     maxUrlsToCrawl: options.maxUrlsToCrawl,
     maxConcurrencies: options.maxConcurrencies,
@@ -219,20 +218,20 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
       try {
         // Kiểm tra nếu URL là file
         const fileExtension = getFileExtension(url);
-        
+
         if (fileExtension) {
           if (options.file && options.file.extensionMatch) {
             // Kiểm tra extension file có match không
             const isFileMatch = Array.isArray(options.file.extensionMatch)
-              ? options.file.extensionMatch.some(ext => minimatch(url, ext))
+              ? options.file.extensionMatch.some((ext) => minimatch(url, ext))
               : minimatch(url, options.file.extensionMatch);
-  
+
             if (isFileMatch) {
               // Nếu match, emit data file và bỏ qua xử lý tiếp
-              dataSubject.next({ 
-                url, 
-                type: 'FILE', 
-                extension: fileExtension 
+              dataSubject.next({
+                url,
+                type: 'FILE',
+                extension: fileExtension,
               } as T);
               return;
             }
@@ -262,10 +261,10 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
           const anchorElements = Array.from(document.querySelectorAll('a'));
           return anchorElements.map((a) => {
             const href = (a as HTMLAnchorElement).href;
-            if (href.startsWith('tel:') || href.startsWith('mailto:') ) {
-              return "";
+            if (href.startsWith('tel:') || href.startsWith('mailto:')) {
+              return '';
             }
-            return new URL(href, window.location.origin).href
+            return new URL(href, window.location.origin).href;
           });
         });
 
@@ -302,7 +301,8 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
   });
 
   // Start crawling and handle completion
-  crawler.start(options.urls)
+  crawler
+    .start(options.urls)
     .then(() => dataSubject.complete())
     .catch((error) => dataSubject.error(error));
 
@@ -323,7 +323,7 @@ export function useCrawlStream<T = any>(options: CrawlOptions) {
     },
     complete: () => {
       console.log('Crawling completed');
-    }
+    },
   });
 
   return crawlObservable;

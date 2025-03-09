@@ -68,6 +68,8 @@ export class ChatGateway
       },
     });
 
+    Logger.debug(`Received user message: ${JSON.stringify(userMessage)}`, 'ChatGateway');
+
     // Gửi tin nhắn của người dùng về client ngay lập tức
     client.emit('message', {
       event: 'message',
@@ -86,10 +88,10 @@ export class ChatGateway
       },
     });
 
+    Logger.debug(`Sending system message: ${JSON.stringify(systemMessage)}`, 'ChatGateway');
+
     // Gửi tin nhắn phản hồi từ hệ thống về client
-    setTimeout(() => {
-      client.emit('message', { event: 'message', data: systemMessage });
-    }, 1000);
+    client.emit('message', { event: 'message', data: systemMessage });
 
     return;
   }

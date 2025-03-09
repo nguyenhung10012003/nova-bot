@@ -18,32 +18,38 @@ function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
 
   // Parse URLs
   const urlsParam = query.urls;
-  const urls = Array.isArray(urlsParam) 
-    ? urlsParam 
-    : (urlsParam ? [urlsParam] : []);
+  const urls = Array.isArray(urlsParam)
+    ? urlsParam
+    : urlsParam
+      ? [urlsParam]
+      : [];
 
   // Parse match patterns
   const matchParam = query.match;
-  const match = Array.isArray(matchParam) 
-    ? matchParam 
-    : (matchParam ? [matchParam] : []);
+  const match = Array.isArray(matchParam)
+    ? matchParam
+    : matchParam
+      ? [matchParam]
+      : [];
 
   // Parse file match patterns
   const fileMatchParam = query.fileMatch;
-  const fileMatch = Array.isArray(fileMatchParam) 
-    ? fileMatchParam 
-    : (fileMatchParam ? [fileMatchParam] : []);
+  const fileMatch = Array.isArray(fileMatchParam)
+    ? fileMatchParam
+    : fileMatchParam
+      ? [fileMatchParam]
+      : [];
 
   // Parse max URLs to crawl
-  const maxUrlsToCrawl = query.maxUrlsToCrawl 
-    ? parseInt(query.maxUrlsToCrawl as string, 10) 
+  const maxUrlsToCrawl = query.maxUrlsToCrawl
+    ? parseInt(query.maxUrlsToCrawl as string, 10)
     : 25;
 
-  return { 
-    urls, 
-    match, 
-    fileMatch, 
-    maxUrlsToCrawl 
+  return {
+    urls,
+    match,
+    fileMatch,
+    maxUrlsToCrawl,
   };
 }
 
@@ -58,19 +64,16 @@ function createCrawlStreamServer() {
 
     try {
       // Parse query parameters
-      const { 
-        urls, 
-        match, 
-        fileMatch, 
-        maxUrlsToCrawl 
-      } = parseQueryParams(req);
+      const { urls, match, fileMatch, maxUrlsToCrawl } = parseQueryParams(req);
 
       // Validate required parameters
       if (!urls?.length || !match) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          error: 'Missing required parameters: urls and match are required' 
-        }));
+        res.end(
+          JSON.stringify({
+            error: 'Missing required parameters: urls and match are required',
+          }),
+        );
         return;
       }
 
@@ -79,18 +82,20 @@ function createCrawlStreamServer() {
         urls,
         match,
         maxUrlsToCrawl,
-        ...(fileMatch?.length ? { 
-          file: { 
-            extensionMatch: fileMatch 
-          } 
-        } : {})
+        ...(fileMatch?.length
+          ? {
+              file: {
+                extensionMatch: fileMatch,
+              },
+            }
+          : {}),
       };
 
       // Set up streaming response
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-open'
+        Connection: 'keep-open',
       });
 
       // Tạo crawl stream
@@ -110,24 +115,25 @@ function createCrawlStreamServer() {
         },
         complete: () => {
           // Kết thúc stream
-          res.write(`event: complete\ndata: ${JSON.stringify("Finished")}\n\n`);
+          res.write(`event: complete\ndata: ${JSON.stringify('Finished')}\n\n`);
           res.end();
           subscription.unsubscribe();
-        }
+        },
       });
 
       // Xử lý khi client ngắt kết nối
       req.on('close', () => {
         subscription.unsubscribe();
       });
-
     } catch (error) {
       // Xử lý các lỗi không mong muốn
       res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        error: 'Internal Server Error', 
-        message: error instanceof Error ? error.message : String(error) 
-      }));
+      res.end(
+        JSON.stringify({
+          error: 'Internal Server Error',
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      );
     }
   });
 

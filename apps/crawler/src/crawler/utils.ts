@@ -1,21 +1,23 @@
-import { Page } from "puppeteer";
+import { Page } from 'puppeteer';
 
 export function normalizeUrl(url: string): string {
   try {
     const normalized = new URL(url);
-    normalized.hash = ""; // Loại bỏ fragment (#...)
-    return normalized.href.replace(/\/$/, ""); // Loại bỏ dấu "/" cuối nếu có
+    normalized.hash = ''; // Loại bỏ fragment (#...)
+    return normalized.href.replace(/\/$/, ''); // Loại bỏ dấu "/" cuối nếu có
   } catch {
-    return url.replace(/\/$/, "").split("#")[0]; // Fallback nếu URL không hợp lệ
+    return url.replace(/\/$/, '').split('#')[0]; // Fallback nếu URL không hợp lệ
   }
 }
 
-
-export function isUrlInCollection(urls: string[] | Set<string>, targetUrl: string): boolean {
+export function isUrlInCollection(
+  urls: string[] | Set<string>,
+  targetUrl: string,
+): boolean {
   const normalizedTarget = normalizeUrl(targetUrl);
 
   if (Array.isArray(urls)) {
-    return urls.some(url => normalizeUrl(url) === normalizedTarget);
+    return urls.some((url) => normalizeUrl(url) === normalizedTarget);
   }
 
   for (const url of urls) {
@@ -43,16 +45,16 @@ export async function waitForXPath(page: Page, xpath: string, timeout: number) {
         document,
         null,
         XPathResult.ANY_TYPE,
-        null
+        null,
       );
       return elements.iterateNext() !== null;
     },
     {},
-    { xpath, timeout }
+    { xpath, timeout },
   );
 }
 
-const defaultSelector = "body";
+const defaultSelector = 'body';
 const defaultIgnoreSelector = `script, style, nav, .hidden, .hide, [class*="menu"], .navbar, .nav, .sidebar, .aside, .modal, [class*="sidebar"]`;
 
 /**
@@ -71,86 +73,87 @@ const defaultIgnoreSelector = `script, style, nav, .hidden, .hide, [class*="menu
 export function getPageHtml(
   page: Page,
   selector = defaultSelector,
-  ignoreSelector = defaultIgnoreSelector
+  ignoreSelector = defaultIgnoreSelector,
 ) {
   return page.evaluate(
     ({ selector, ignoreSelector }) => {
       // Check if the selector is an XPath
-      if (selector.startsWith("/")) {
+      if (selector.startsWith('/')) {
         const elements = document.evaluate(
           selector,
           document,
           null,
           XPathResult.ANY_TYPE,
-          null
+          null,
         );
         let result = elements.iterateNext();
         if (result && result instanceof HTMLElement && ignoreSelector) {
           const ignoredElements = result.querySelectorAll(ignoreSelector);
           ignoredElements.forEach((el) => el.remove());
-          return result.textContent || "";
+          return result.textContent || '';
         }
-        return "";
+        return '';
       } else {
         // Handle as a CSS selector
         const el = document.querySelector(selector) as HTMLElement | null;
         if (el && ignoreSelector) {
           const ignoredElements = el.querySelectorAll(ignoreSelector);
           ignoredElements.forEach((el) => el.remove());
-          return el.innerText || "";
+          return el.innerText || '';
         }
-        return "";
+        return '';
       }
     },
-    { selector, ignoreSelector }
+    { selector, ignoreSelector },
   );
 }
 
 export function getFileUrls(
   page: Page,
   extensionMatch: string,
-  baseUrl: string
+  baseUrl: string,
 ) {
   return page.evaluate(
     ({ extensionMatch, baseUrl }) => {
-      const elements = document.querySelectorAll("a[href]");
+      const elements = document.querySelectorAll('a[href]');
       const regex = new RegExp(extensionMatch);
       const filteredElements = Array.from(elements).filter((el) =>
-        regex.test(el.getAttribute("href") || "")
+        regex.test(el.getAttribute('href') || ''),
       );
       const urls: string[] = [];
       filteredElements.forEach((el) => {
-        const url = el.getAttribute("href");
+        const url = el.getAttribute('href');
         if (url) {
           urls.push(new URL(url, baseUrl).href);
         }
       });
       return urls;
     },
-    { extensionMatch, baseUrl }
+    { extensionMatch, baseUrl },
   );
 }
 
 export /**
-* Kiểm tra xem một URL có phải là URL của file hay không (không tính .html)
-* @param url - Đường dẫn URL cần kiểm tra
-* @returns Boolean cho biết URL có phải URL của file hay không
-*/
+ * Kiểm tra xem một URL có phải là URL của file hay không (không tính .html)
+ * @param url - Đường dẫn URL cần kiểm tra
+ * @returns Boolean cho biết URL có phải URL của file hay không
+ */
 function isFileUrl(url: string): boolean {
-   try {
-       // Kiểm tra URL có hợp lệ không
-       const parsedUrl = new URL(url);
-       
-       // Lấy phần path của URL
-       const path = parsedUrl.pathname;
-       
-       // Kiểm tra xem path có phần mở rộng file hợp lệ không (trừ .html)
-       const fileExtensionRegex = /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
-       return fileExtensionRegex.test(path);
-   } catch (error) {
-       // Nếu URL không hợp lệ, trả về false
-       return false;
-   }
+  try {
+    // Kiểm tra URL có hợp lệ không
+    const parsedUrl = new URL(url);
+
+    // Lấy phần path của URL
+    const path = parsedUrl.pathname;
+
+    // Kiểm tra xem path có phần mở rộng file hợp lệ không (trừ .html)
+    const fileExtensionRegex =
+      /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
+    return fileExtensionRegex.test(path);
+  } catch (error) {
+    // Nếu URL không hợp lệ, trả về false
+    return false;
+  }
 }
 
 /**
@@ -160,21 +163,22 @@ function isFileUrl(url: string): boolean {
  */
 export function getFileExtension(path: string): string {
   try {
-      // Loại bỏ các query params và fragment
-      const cleanPath = path.split('?')[0].split('#')[0];
-      
-      // Lấy tên file từ path
-      const fileName = cleanPath.split('/').pop() || '';
-      
-      // Regex kiểm tra phần mở rộng file
-      const fileExtensionRegex = /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
-      
-      // Nếu không match với regex, trả về chuỗi rỗng
-      if (!fileExtensionRegex.test(fileName.toLowerCase())) return '';
-      
-      // Lấy phần mở rộng (không bao gồm dấu chấm)
-      return fileName.split('.').pop()?.toLowerCase() || '';
+    // Loại bỏ các query params và fragment
+    const cleanPath = path.split('?')[0].split('#')[0];
+
+    // Lấy tên file từ path
+    const fileName = cleanPath.split('/').pop() || '';
+
+    // Regex kiểm tra phần mở rộng file
+    const fileExtensionRegex =
+      /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
+
+    // Nếu không match với regex, trả về chuỗi rỗng
+    if (!fileExtensionRegex.test(fileName.toLowerCase())) return '';
+
+    // Lấy phần mở rộng (không bao gồm dấu chấm)
+    return fileName.split('.').pop()?.toLowerCase() || '';
   } catch (error) {
-      return '';
+    return '';
   }
 }
