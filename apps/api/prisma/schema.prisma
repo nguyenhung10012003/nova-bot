@@ -46,6 +46,8 @@ model Chatflow {
   sources      Source[]
   documents    Document[]
   chatSessions ChatSession[]
+
+  Integration Integration[]
 }
 
 enum SourceType {
@@ -141,4 +143,21 @@ model ChatMessage {
   file          String[]
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
+}
+
+enum IntegrationType {
+  FACEBOOK
+  TELEGRAM
+}
+
+model Integration {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  accessToken String?
+  pageId      String          @unique
+  type        IntegrationType
+  chatflowId  String          @db.ObjectId
+  chatflow    Chatflow        @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
