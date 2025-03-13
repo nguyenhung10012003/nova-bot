@@ -12,8 +12,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { AccessTokenGuard } from 'src/common/guards/access-token.guard';
+import { ALLOWED_DOCUMENT_FILE_TYPES } from 'src/constant';
 import { CreateSourceDto } from './sources.dto';
 import { SourcesService } from './sources.service';
 
@@ -40,20 +41,28 @@ export class SourcesController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('file', {
-      fileFilter(req, file, callback) {
+    FilesInterceptor('files', 1000, {
+      fileFilter(_req, file, callback) {
         if (!file) {
-          callback(null, false);
+          return callback(null, true);
         } else {
+          const isValid = ALLOWED_DOCUMENT_FILE_TYPES.includes(file.mimetype);
+          if (isValid) {
+            callback(null, true);
+          } else {
+            callback(new Error('Invalid file type'), false);
+          }
         }
-        callback(null, true);
       },
     }),
   )
   async createSource(
     @Body() data: CreateSourceDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() files: Array<Express.Multer.File>,
   ) {
+    if (files) {
+      
+    }
     return this.sourcesService.createSource(data);
   }
 

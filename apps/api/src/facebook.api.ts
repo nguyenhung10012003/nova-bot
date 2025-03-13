@@ -1,3 +1,5 @@
+import { Logger } from "@nestjs/common";
+
 interface FacebookPage {
   id: string;
   name: string;
@@ -80,3 +82,53 @@ export async function getFacebookAccessToken(
     return null;
   }
 }
+
+interface SendMessageParams {
+  pageAccessToken: string; // Token của trang Facebook
+  userId: string; // ID người nhận tin nhắn
+  message: string; // Nội dung tin nhắn
+}
+
+/**
+ * Send a message to a user on Facebook Messenger
+ * @param params 
+ * @returns
+ * @example
+ * // Example usage
+ * const pageAccessToken = "YOUR_PAGE_ACCESS_TOKEN";
+ * const userId = "USER_ID";
+ * const message = "Hello, world!";
+ * sendFacebookMessage({ pageAccessToken, userId, message });
+ */
+export async function sendFacebookMessage(
+  params: SendMessageParams,
+): Promise<void> {
+  const { pageAccessToken, userId, message } = params;
+
+  const FACEBOOK_API_URL = 'https://graph.facebook.com/v22.0/me/messages';
+
+  const payload = {
+    recipient: { id: userId },
+    message: { text: message },
+  };
+
+  try {
+    const response = await fetch(
+      `${FACEBOOK_API_URL}?access_token=${pageAccessToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Facebook API Error: ${JSON.stringify(data)}`);
+    }
+  } catch (error) {
+    Logger.error('Failed to send message:', error);
+  }
+}
+

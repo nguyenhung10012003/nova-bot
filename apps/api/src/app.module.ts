@@ -14,6 +14,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
 import { ChatModule } from './chat/chat.module';
+import { WebhookModule } from './webhook/webhook.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -37,7 +39,9 @@ import { ChatModule } from './chat/chat.module';
     AuthModule,
     ChatflowModule,
     SourcesModule,
-    ChatModule
+    ChatModule,
+    WebhookModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [

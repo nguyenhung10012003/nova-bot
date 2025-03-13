@@ -5,6 +5,7 @@ export interface Source {
   rootUrl?: string;
   text?: string;
   chatflowId: string;
+  sourceStatus: 'CREATED' | 'PROCESSING' | 'PROCESSED' | 'SYNED' | 'ERROR';
   urls?: {
     url: string;
     type: 'URL' | 'FILE';

@@ -4,7 +4,7 @@ import { CronJob } from 'cron';
 
 @Injectable()
 export class SchedulerService {
-  timeZone: string = 'Asia/Ho_Chi_Minh';
+  timeZone: string;
   constructor(private scheduleRegistry: SchedulerRegistry) {}
 
   public async addCronJob(

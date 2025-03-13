@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { FlowiseApi } from '@nova/flowise-api';
+import { FlowiseApi, NoStreamResponse } from '@nova/flowise-api';
 import { PrismaService } from 'src/prisma/prisma.service';
+
 
 @Injectable()
 export class ChatService {
@@ -46,7 +47,7 @@ export class ChatService {
     });
   }
 
-  async getBotMessages(chatflowId: string, message: string) {
+  async getBotMessages(chatflowId: string, message: string): Promise<NoStreamResponse> {
     const chatflow = await this.prismaService.chatflow.findUnique({
       where: { id: chatflowId },
     });
