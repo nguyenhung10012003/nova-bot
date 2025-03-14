@@ -13,7 +13,10 @@
     "JWT_EXPIRES_IN",
     "CRAWLER_API_URL",
     "TIMEZONE",
-    "BASE_URL"
+    "BASE_URL",
+    "FACEBOOK_APP_ID",
+    "FACEBOOK_APP_SECRET",
+    "FACEBOOK_WEBHOOK_VERIFY_TOKEN"
   ],
   "tasks": {
     "dev": {

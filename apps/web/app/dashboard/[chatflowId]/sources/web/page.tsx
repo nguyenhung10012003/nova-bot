@@ -1,3 +1,4 @@
+import { Source } from '@/@types/source';
 import { api } from '@/api/api';
 import SourceStatusBadge from '@/components/source/source-status-badge';
 import { UpsertChatflow } from '@/components/source/upsert-chatflow';
@@ -8,7 +9,7 @@ import Link from 'next/link';
 
 const getWebsiteSources = async (chatflowId: string) => {
   try {
-    const response = await api.get<any>(
+    const response = await api.get(
       `/sources?chatflowId=${chatflowId}&type=WEBSITE`,
       {
         next: {
@@ -43,7 +44,7 @@ export default async function Page({
       </div>
       {websiteSources?.length ? (
         <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-          {websiteSources.map((source: any, index: number) => (
+          {websiteSources.map((source: Source, index: number) => (
             <Card
               key={index}
               className="p-4 shadow-sm group hover:shadow-md hover:cursor-pointer transition-all duration-200"

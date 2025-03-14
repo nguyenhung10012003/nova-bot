@@ -15,6 +15,8 @@ import { IntegrationModule } from './integration/integration.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
+import { WebhookModule } from './webhook/webhook.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { SourcesModule } from './sources/sources.module';
     ChatflowModule,
     SourcesModule,
     ChatModule,
+    WebhookModule,
+    StorageModule,,
     IntegrationModule,
   ],
   controllers: [AppController],

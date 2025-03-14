@@ -93,7 +93,7 @@ model Source {
   rootUrl      String?
   fetchSetting FetchSetting?
   sourceStatus SourceStatus  @default(CREATED)
-  file         String?
+  files        String[]
   chatflowId   String        @db.ObjectId
   chatflow     Chatflow      @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
   lastFetch    DateTime?
