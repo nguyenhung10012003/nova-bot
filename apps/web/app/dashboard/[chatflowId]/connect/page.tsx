@@ -11,13 +11,14 @@ import {
 
 const getIntegration = async (chatflowId: string, type?: string) => {
   const res = await api.get(
-    `/integration?chatflowId=${chatflowId}&type=${type}`,
+    `/integration?chatflowId=${chatflowId}&type=${type === 'fb' ? 'FACEBOOK' : 'TELEGRAM'}`,
     {
       next: {
         tags: ['integrations'],
       },
     },
   );
+  console.log(res)
 
   if (res.error) {
     return null;

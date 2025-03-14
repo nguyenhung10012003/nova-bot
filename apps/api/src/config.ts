@@ -5,6 +5,7 @@ export const getConfig = () => ({
   fileStoragePath: path.join(process.cwd(), 'storage'),
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || "3000"),
+  baseUrl: process.env.BASE_URL || 'http://localhost:3000',
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || "6379"),

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { getFacebookAccessToken, getFacebookPages } from './facebook.api';
@@ -28,6 +28,7 @@ export class IntegrationService {
       clientSecret,
     );
     const pages = await getFacebookPages('me', accessToken);
+    Logger.debug('Get pages from facebook, result: ' + JSON.stringify(pages));
     await this.prismaService.integration.createMany({
       data: pages.map((page) => ({
         chatflowId,
@@ -48,13 +49,13 @@ export class IntegrationService {
   }) {
     return this.prismaService.integration.findMany({
       where: {
-        id: chatflowId,
+        chatflowId,
         type,
       },
     });
   }
 
-  async getIntegration({id} : {id: string}) {
+  async getIntegration({ id }: { id: string }) {
     return this.prismaService.integration.findUnique({
       where: {
         id,
@@ -62,7 +63,7 @@ export class IntegrationService {
     });
   }
 
-  async deleteIntegration({id} : {id: string}) {
+  async deleteIntegration({ id }: { id: string }) {
     return this.prismaService.integration.delete({
       where: {
         id,

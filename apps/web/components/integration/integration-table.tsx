@@ -30,6 +30,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ArrowUpDown, Filter, MoreHorizontal, Plus } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
 type IntegrationTableProps = {
@@ -38,6 +39,7 @@ type IntegrationTableProps = {
 export default function IntegrationTable({
   integrations,
 }: IntegrationTableProps) {
+  const { chatflowId } = useParams();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -107,6 +109,10 @@ export default function IntegrationTable({
       pagination,
     },
   });
+
+  const handleConnectFacebook = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/integration/facebook/connect?chatflowId=${chatflowId}&redirectUrl=${window.location.href}`;
+  };
   return (
     <>
       <div className="flex justify-between items-center">
@@ -117,7 +123,7 @@ export default function IntegrationTable({
           </Button>
           <Input placeholder="Search" />
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleConnectFacebook}>
           <Plus size={20} />
           <span>New Page</span>
         </Button>
@@ -175,12 +181,10 @@ export default function IntegrationTable({
         </div>
         <div className="flex justify-between items-center">
           <div>
-            {
-              <span className='text-sm text-muted-foreground'>
-                Showing {table.getPaginationRowModel().rows.length} of{' '}
-                {table.getCoreRowModel().rows.length} results
-              </span>
-            }
+            <span className="text-sm text-muted-foreground">
+              Showing {table.getPaginationRowModel().rows.length} of{' '}
+              {table.getCoreRowModel().rows.length} results
+            </span>
           </div>
           <div className="flex items-center space-x-2 py-4">
             <Button

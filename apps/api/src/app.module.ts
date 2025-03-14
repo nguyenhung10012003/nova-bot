@@ -6,14 +6,15 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 import { ChatflowModule } from './chatflow/chatflow.module';
 import { AccessTokenStrategy } from './common/strategies/access-token.strategy';
 import { RefreshTokenStrategy } from './common/strategies/refresh-token.strategy';
 import { getConfig } from './config';
+import { IntegrationModule } from './integration/integration.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
-import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -37,7 +38,8 @@ import { ChatModule } from './chat/chat.module';
     AuthModule,
     ChatflowModule,
     SourcesModule,
-    ChatModule
+    ChatModule,
+    IntegrationModule,
   ],
   controllers: [AppController],
   providers: [

@@ -12,7 +12,8 @@
     "JWT_SECRET",
     "JWT_EXPIRES_IN",
     "CRAWLER_API_URL",
-    "TIMEZONE"
+    "TIMEZONE",
+    "BASE_URL"
   ],
   "tasks": {
     "dev": {
