@@ -63,6 +63,17 @@ export class IntegrationService {
     });
   }
 
+  async updateIntegration({id, status} : {id: string, status: 'ENABLED' | 'DISABLED'}) {
+    return this.prismaService.integration.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
   async deleteIntegration({ id }: { id: string }) {
     return this.prismaService.integration.delete({
       where: {

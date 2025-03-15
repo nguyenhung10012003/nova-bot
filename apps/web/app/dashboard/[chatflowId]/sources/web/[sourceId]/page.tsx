@@ -2,8 +2,8 @@ import { api } from '@/api/api';
 import { GotoBtn } from '@/components/goto-btn';
 import DeleteSource from '@/components/source/delete-source';
 import { RerefreshSource } from '@/components/source/refresh-source';
-import { SourceControlCard } from '@/components/source/source-control-card';
 import { SourceDialog } from '@/components/source/source-dialog';
+import { SourceSetting } from '@/components/source/source-setting';
 import SourceStatusBadge from '@/components/source/source-status-badge';
 import { UrlList } from '@/components/source/url-list';
 import { Button } from '@nova/ui/components/ui/button';
@@ -34,7 +34,7 @@ export default async function Page({
     return <div>Source not found</div>;
   }
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center gap-4 justify-between">
         <div className="flex items-center gap-4">
           <GotoBtn
@@ -59,21 +59,16 @@ export default async function Page({
           />
         </div>
         <div className="flex gap-2">
+          <SourceSetting source={source} />
           <RerefreshSource source={source} />
           <DeleteSource source={source} />
         </div>
       </div>
-      <div className="flex mt-4">
+      <div className="flex">
         <SourceStatusBadge status={source.sourceStatus} />
       </div>
-      <div className="flex flex-col md:flex-row mt-8">
-        <div className="flex basis-3/5 shrink-0 w-full flex-col">
-          <UrlList urls={source?.urls || []} />
-        </div>
-        <div className="basis-2/5 shrink-0 w-full relative md:pl-4 py-4">
-          <SourceControlCard source={source} />
-        </div>
-      </div>
+
+      <UrlList urls={source?.urls || []} />
     </div>
   );
 }

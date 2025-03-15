@@ -26,12 +26,12 @@ export function ReprocessSource(props: ReprocessSourceProps) {
   };
   return (
     <Button
-      className="gap-2 w-full h-auto p-4 flex-col"
+      className="gap-2 justify-start px-2"
       onClick={reprocess}
       disabled={loading}
-      variant={'outline'}
+      variant={'ghost'}
     >
-      <DatabaseBackup className="w-8 h-8" />
+      <DatabaseBackup className="w-5 h-5" />
       <span>Reprocess</span>
     </Button>
   );

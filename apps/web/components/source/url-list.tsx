@@ -134,7 +134,7 @@ export function UrlList({ urls }: UrlListProps) {
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="max-w-[400px] truncate" title={row.getValue('url')}>
+        <div className="w-full max-w-[600px] truncate" title={row.getValue('url')}>
           {row.getValue('url')}
         </div>
       ),
@@ -202,8 +202,7 @@ export function UrlList({ urls }: UrlListProps) {
   });
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold mb-4">URLs</h2>
+    <div className="space-y-4 mt-2">
       <div className="flex items-center justify-between gap-4">
         <div className="relative max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -296,7 +295,7 @@ export function UrlList({ urls }: UrlListProps) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 pb-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} URL(s) selected.

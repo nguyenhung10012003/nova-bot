@@ -13714,6 +13714,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-code-block@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "react-code-block@npm:1.1.3"
+  peerDependencies:
+    prism-react-renderer: ^2
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 10c0/1759cbe8d7e130f4184c462a3a03c3ccdfb7fc5722fb9235f5cdb27e7a681b33dea0756edea208d9123b838a4fc3970f1c052d309c7ee4612b34fcaf2dd014f7
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:^18.2.0":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
@@ -16567,6 +16578,7 @@ __metadata:
     next-themes: "npm:^0.4.4"
     postcss: "npm:^8.4.47"
     react: "npm:^18.2.0"
+    react-code-block: "npm:^1.1.3"
     react-dom: "npm:^18.2.0"
     react-hook-form: "npm:^7.54.2"
     react-markdown: "npm:^10.0.0"

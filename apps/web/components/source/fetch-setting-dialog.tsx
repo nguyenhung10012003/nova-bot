@@ -21,7 +21,7 @@ import {
 import { Input } from '@nova/ui/components/ui/input';
 import { toast } from '@nova/ui/components/ui/sonner';
 import { Switch } from '@nova/ui/components/ui/switch';
-import { Settings } from 'lucide-react';
+import { PickaxeIcon, Settings } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { LabelWithHelp } from '../label-with-help';
 import RecurringTimeSelector from '../recurring-time-selector';
@@ -80,10 +80,10 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
     <Dialog open={open} onOpenChange={setOpen} modal={false}>
       <DialogTrigger asChild>
         <Button
-          className="gap-2 w-full h-auto p-4 flex-col"
-          variant={'outline'}
+          className="gap-2 px-2 justify-start"
+          variant={'ghost'}
         >
-          <Settings className="w-8 h-8" />
+          <PickaxeIcon className="w-5 h-5" />
           <span>Crawl Setting</span>
         </Button>
       </DialogTrigger>

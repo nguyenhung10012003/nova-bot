@@ -23,7 +23,7 @@ export class WorkerService {
         return this.sourceWorker.add(
           jobName,
           data as Source & { refresh?: boolean },
-          options,
+          {removeOnComplete: true, removeOnFail: true, ...options},
         );
     }
   }

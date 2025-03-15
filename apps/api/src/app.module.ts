@@ -13,10 +13,11 @@ import { RefreshTokenStrategy } from './common/strategies/refresh-token.strategy
 import { getConfig } from './config';
 import { IntegrationModule } from './integration/integration.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
-import { WebhookModule } from './webhook/webhook.module';
 import { StorageModule } from './storage/storage.module';
+import { WebhookModule } from './webhook/webhook.module';
 import { WorkerModule } from './worker/worker.module';
 
 @Module({
@@ -46,6 +47,7 @@ import { WorkerModule } from './worker/worker.module';
     StorageModule,
     IntegrationModule,
     WorkerModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [

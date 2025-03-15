@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   HttpException,
+  Logger,
   Post,
   Query,
   Req,
@@ -33,6 +34,7 @@ export class FacebookWebhookController {
   @Post()
   handleWebhook(@Req() req: Request, @Res() res: Response) {
     const body = req.body;
+    Logger.debug('Received webhook event from facebook', body, 'Webhook');
 
     if (body.object === 'page') {
       body.entry.forEach((entry: any) => {

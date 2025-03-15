@@ -6,7 +6,13 @@ import { LogRequestInterceptor } from './common/interceptors/log-request.interce
 
 async function bootstrap() {
   const port = process.env.PORT || 3000;
-  const app = await NestFactory.create(AppModule);
+  const environment = process.env.NODE_ENV || 'development';
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      environment === 'development'
+        ? ['debug', 'error', 'fatal', 'log', 'verbose', 'warn']
+        : ['error', 'warn', 'log'],
+  });
 
   const corsOptions: CorsOptions = {
     origin: '*',

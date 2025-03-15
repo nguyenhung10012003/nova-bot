@@ -285,7 +285,7 @@ export const FilesTable = ({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 pb-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} file(s) selected.
@@ -392,7 +392,7 @@ export default function FileSource({ source }: { source?: SourceType }) {
     }
   };
   return (
-    <>
+    <div className='mt-4 flex flex-col gap-4'>
       <FileUpload
         className="w-full"
         accept={acceptFileTypes}
@@ -426,6 +426,6 @@ export default function FileSource({ source }: { source?: SourceType }) {
           No files selected. Upload files using the drag and drop area above.
         </div>
       )}
-    </>
+    </div>
   );
 }

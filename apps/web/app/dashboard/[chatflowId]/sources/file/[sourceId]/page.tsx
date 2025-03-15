@@ -3,8 +3,8 @@ import { GotoBtn } from '@/components/goto-btn';
 import DeleteSource from '@/components/source/delete-source';
 import FileSource from '@/components/source/file-source';
 import { RerefreshSource } from '@/components/source/refresh-source';
-import { SourceControlCard } from '@/components/source/source-control-card';
 import { SourceDialog } from '@/components/source/source-dialog';
+import { SourceSetting } from '@/components/source/source-setting';
 import SourceStatusBadge from '@/components/source/source-status-badge';
 import { Button } from '@nova/ui/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
@@ -34,7 +34,7 @@ export default async function Page({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center gap-4 justify-between">
         <div className="flex items-center gap-4">
           <GotoBtn
@@ -59,21 +59,15 @@ export default async function Page({
           />
         </div>
         <div className="flex gap-2">
+          <SourceSetting source={source} />
           <RerefreshSource source={source} />
           <DeleteSource source={source} />
         </div>
       </div>
-      <div className="flex mt-4">
+      <div className="flex">
         <SourceStatusBadge status={source.sourceStatus} />
       </div>
-      <div className="flex flex-col md:flex-row mt-8 gap-4">
-        <div className="flex basis-2/3 shrink-0 w-full flex-col space-y-6">
-          <FileSource source={source} />
-        </div>
-        <div className="basis-1/3 shrink-0 w-full" id="actions">
-          <SourceControlCard source={source} />
-        </div>
-      </div>
+      <FileSource source={source} />
     </div>
   );
 }

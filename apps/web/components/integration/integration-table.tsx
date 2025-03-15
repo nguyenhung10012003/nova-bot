@@ -1,5 +1,7 @@
 'use client';
 import { Integration } from '@/@types/integration';
+import revalidate from '@/api/action';
+import { api } from '@/api/api';
 import { Button } from '@nova/ui/components/ui/button';
 import {
   DropdownMenu,
@@ -9,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@nova/ui/components/ui/dropdown-menu';
 import { Input } from '@nova/ui/components/ui/input';
+import { toast } from '@nova/ui/components/ui/sonner';
 import {
   Table,
   TableBody,
@@ -53,6 +56,7 @@ export default function IntegrationTable({
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className='hover:bg-transparent p-0'
         >
           Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -66,6 +70,24 @@ export default function IntegrationTable({
       cell: ({ row }) => {
         const type = row.getValue('type');
         return <span>{type === 'FACEBOOK' ? 'Facebook' : 'Telegram'}</span>;
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const status = row.getValue('status');
+        return (
+          <span
+            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+              status === 'ENABLED'
+                ? 'bg-green-500 text-green-50'
+                : 'bg-red-500 text-red-50'
+            }`}
+          >
+            {status === 'ENABLED' ? 'Enabled' : 'Disabled'}
+          </span>
+        );
       },
     },
     {
@@ -83,10 +105,10 @@ export default function IntegrationTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleToggleIntegration(integration)}>
                 {integration.status === 'ENABLED' ? 'Disable' : 'Enable'}
               </DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDeleteIntegration(integration)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -113,8 +135,28 @@ export default function IntegrationTable({
   const handleConnectFacebook = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/integration/facebook/connect?chatflowId=${chatflowId}&redirectUrl=${window.location.href}`;
   };
+
+  const handleDeleteIntegration = async (integration: Integration) => {
+    const res = await api.delete(`/integration/${integration.id}`);
+    if (res.error) {
+      toast.error('Failed to delete integration');
+    } else {
+      revalidate('integrations');
+    }
+  }
+
+  const handleToggleIntegration = async (integration: Integration) => {
+    const res = await api.patch(`/integration/${integration.id}`, {
+      status: integration.status === 'ENABLED' ? 'DISABLED' : 'ENABLED',
+    });
+    if (res.error) {
+      toast.error('Failed to toggle integration');
+    } else {
+      revalidate('integrations');
+    }
+  }
   return (
-    <>
+    <div className='space-y-4'>
       <div className="flex justify-between items-center">
         <div className="flex gap-4">
           <Button className="gap-2">
@@ -206,6 +248,6 @@ export default function IntegrationTable({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

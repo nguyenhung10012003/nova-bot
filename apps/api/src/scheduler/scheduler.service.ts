@@ -16,7 +16,7 @@ export class SchedulerService {
       timeZone?: string;
     },
   ) {
-    this.timeZone = process.env.TIMEZONE || 'Asia/Ho_Chi_Minh';
+    this.timeZone = process.env.TIMEZONE || 'UTC';
     const job = new CronJob(
       cron,
       callback,

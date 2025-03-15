@@ -1,16 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateSourceDto } from './sources.dto';
-import { WorkerService } from 'src/worker/worker.service';
-import { SOURCE_WORKER } from 'src/worker/constant';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { File } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { SchedulerService } from 'src/scheduler/scheduler.service';
+import { SOURCE_WORKER } from 'src/worker/constant';
+import { WorkerService } from 'src/worker/worker.service';
+import { CreateSourceDto } from './sources.dto';
 
 @Injectable()
-export class SourcesService {
+export class SourcesService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workerService: WorkerService,
+    private readonly schedulerService: SchedulerService,
   ) {}
+
+  async onModuleInit() {
+    const sources = await this.prisma.source.findMany();
+    for (const source of sources) {
+      if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
+        this.schedulerService.addCronJob(
+          `auto-crawl-${source.id}`,
+          source.fetchSetting.cronExpression,
+          async () => {
+            await this.workerService.addJob(
+              SOURCE_WORKER,
+              `crawl-source-${source.id}`,
+              { ...source, refresh: true },
+            );
+          },
+        );
+      }
+    }
+  }
 
   async getSources({
     chatflowId,
@@ -30,19 +51,37 @@ export class SourcesService {
     });
   }
 
-  async createSource(data: CreateSourceDto & {files?: File[]}) {
+  async createSource(data: CreateSourceDto & { files?: File[] }) {
     const source = await this.prisma.source.create({
       data,
     });
 
-    
-    await this.workerService.addJob(SOURCE_WORKER, `crawl-source-${source.id}`, {...source, refresh: true});
-    
+    await this.workerService.addJob(
+      SOURCE_WORKER,
+      `crawl-source-${source.id}`,
+      { ...source, refresh: true },
+    );
+    if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
+      this.schedulerService.addCronJob(
+        `auto-crawl-${source.id}`,
+        source.fetchSetting.cronExpression,
+        async () => {
+          await this.workerService.addJob(
+            SOURCE_WORKER,
+            `crawl-source-${source.id}`,
+            { ...source, refresh: true },
+          );
+        },
+      );
+    }
 
     return source;
   }
 
-  async updateSource(id: string, data: Partial<CreateSourceDto> & {files?: File[]}) {
+  async updateSource(
+    id: string,
+    data: Partial<CreateSourceDto> & { files?: File[] },
+  ) {
     const source = await this.prisma.source.update({
       where: { id },
       data: {
@@ -57,6 +96,23 @@ export class SourcesService {
           : undefined,
       },
     });
+
+    if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
+      await this.schedulerService.removeCronJob(`auto-crawl-${source.id}`);
+      await this.schedulerService.addCronJob(
+        `auto-crawl-${source.id}`,
+        source.fetchSetting.cronExpression,
+        async () => {
+          await this.workerService.addJob(
+            SOURCE_WORKER,
+            `crawl-source-${source.id}`,
+            { ...source, refresh: true },
+          );
+        },
+      );
+    } else {
+      await this.schedulerService.removeCronJob(`auto-crawl-${source.id}`);
+    }
 
     return source;
   }
@@ -77,8 +133,11 @@ export class SourcesService {
   }
 
   async deleteSource(id: string) {
-    return this.prisma.source.delete({
+    const source = await this.prisma.source.delete({
       where: { id },
     });
+
+    await this.schedulerService.removeCronJob(`auto-crawl-${source.id}`);
+    return source;
   }
 }

@@ -105,7 +105,6 @@ export class SourcesController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('id') id: string,
   ) {
-    console.log(data);
     if (files?.length > 0) {
       const filesPath = await Promise.all(
         files.map(async (file) => {

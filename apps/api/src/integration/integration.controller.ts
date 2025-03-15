@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
   Query,
   Res,
   UseGuards,
@@ -66,7 +68,7 @@ export class IntegrationController {
   @Get('/')
   async getIntegration(
     @Query('chatflowId') chatflowId: string,
-    @Query('type') type: string,
+    @Query('type') type?: string,
   ) {
     return this.integrationService.getIntegrations({
       chatflowId,
@@ -78,6 +80,15 @@ export class IntegrationController {
   @Get('/:id')
   async getIntegrationById(@Param('id') id: string) {
     return this.integrationService.getIntegration({ id });
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Patch('/:id')
+  async toggleIntegration(
+    @Param('id') id: string,
+    @Body() data: {status: 'ENABLED' | 'DISABLED'},
+  ) {
+    return this.integrationService.updateIntegration({ id, ...data });
   }
 
   @UseGuards(AccessTokenGuard)
