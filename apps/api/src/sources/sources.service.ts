@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { CrawlService } from 'src/crawl/crawl.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSourceDto } from './sources.dto';
+import { WorkerService } from 'src/worker/worker.service';
+import { SOURCE_WORKER } from 'src/worker/constant';
+import { File } from '@prisma/client';
 
 @Injectable()
 export class SourcesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly crawlService: CrawlService,
+    private readonly workerService: WorkerService,
   ) {}
 
   async getSources({
@@ -28,19 +30,19 @@ export class SourcesService {
     });
   }
 
-  async createSource(data: CreateSourceDto) {
+  async createSource(data: CreateSourceDto & {files?: File[]}) {
     const source = await this.prisma.source.create({
       data,
     });
 
-    if (source.type === 'WEBSITE') {
-      await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
-    }
+    
+    await this.workerService.addJob(SOURCE_WORKER, `crawl-source-${source.id}`, {...source, refresh: true});
+    
 
     return source;
   }
 
-  async updateSource(id: string, data: Partial<CreateSourceDto>) {
+  async updateSource(id: string, data: Partial<CreateSourceDto> & {files?: File[]}) {
     const source = await this.prisma.source.update({
       where: { id },
       data: {
@@ -56,10 +58,6 @@ export class SourcesService {
       },
     });
 
-    if (source.type === 'WEBSITE' && (data.urls || data.rootUrl)) {
-      await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, source);
-    }
-
     return source;
   }
 
@@ -71,7 +69,7 @@ export class SourcesService {
     if (!source) {
       throw new Error('Source not found');
     }
-    await this.crawlService.addCrawlJob(`crawl-source-${source.id}`, {
+    this.workerService.addJob(SOURCE_WORKER, `crawl-source-${source.id}`, {
       ...source,
       refresh: true,
     });

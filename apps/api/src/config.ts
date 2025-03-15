@@ -14,6 +14,6 @@ export const getConfig = () => ({
   facebook: {
     appId: process.env.FACEBOOK_APP_ID || '',
     appSecret: process.env.FACEBOOK_APP_SECRET || '',
-    verifyToken: process.env.FACEBOOK_WEBHOOK__VERIFY_TOKEN || '',
+    verifyToken: process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN || '',
   },
 });

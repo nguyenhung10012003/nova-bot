@@ -19,11 +19,12 @@ import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-type WebSourceDialogProps = {
+type SourceDialogProps = {
   source?: Source;
   trigger?: React.ReactNode;
+  type?: 'WEBSITE' | 'FILE';
 };
-export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
+export function SourceDialog({ source, trigger, type = 'WEBSITE' }: SourceDialogProps) {
   const isEdit = useMemo(() => !!source, [source]);
   const [open, setOpen] = useState(false);
   const { chatflowId } = useParams();
@@ -36,7 +37,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
       const res = await api.patch(`/sources/${source?.id}`, {
         name: data.name,
         rootUrl: data.url,
-        type: 'WEBSITE',
+        type: source?.type,
         chatflowId,
       });
       if (res.error) {
@@ -52,7 +53,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
       const res = await api.post('/sources', {
         name: data.name,
         rootUrl: data.url,
-        type: 'WEBSITE',
+        type: type,
         chatflowId,
       });
       if (res.error) {
@@ -95,7 +96,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
               required
             />
           </div>
-          <div className="flex flex-col space-y-2">
+          {type === 'WEBSITE' && <div className="flex flex-col space-y-2">
             <Label htmlFor="url">Url</Label>
             <Input
               id="url"
@@ -105,7 +106,7 @@ export function WebSourceDialog({ source, trigger }: WebSourceDialogProps) {
               defaultValue={source?.rootUrl}
               required
             />
-          </div>
+          </div>}
           <DialogFooter>
             <Button type="submit">Save</Button>
           </DialogFooter>

@@ -1,8 +1,8 @@
 import { Source } from '@/@types/source';
 import { api } from '@/api/api';
+import { SourceDialog } from '@/components/source/source-dialog';
 import SourceStatusBadge from '@/components/source/source-status-badge';
 import { UpsertChatflow } from '@/components/source/upsert-chatflow';
-import { WebSourceDialog } from '@/components/source/web-source-dialog';
 import { Badge } from '@nova/ui/components/ui/badge';
 import { Card } from '@nova/ui/components/ui/card';
 import Link from 'next/link';
@@ -39,7 +39,7 @@ export default async function Page({
         <h1 className="text-2xl font-bold text-foreground">Website Sources</h1>
         <div className="flex gap-2">
           <UpsertChatflow chatflow={{ id: params.chatflowId }} />
-          <WebSourceDialog />
+          <SourceDialog />
         </div>
       </div>
       {websiteSources?.length ? (

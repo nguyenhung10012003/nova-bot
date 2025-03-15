@@ -1,7 +1,6 @@
 'use client';
-import { socket } from '@/socket/socket';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Socket } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 interface ChatContextType {
   socket: Socket | null;
@@ -13,9 +12,13 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    socket.connect();
+    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
+      transports: ['websocket'],
+    });
+    setSocket(socket);
 
     return () => {
       socket.disconnect();
@@ -23,9 +26,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <ChatContext.Provider value={{ socket }}>
-      {children}
-    </ChatContext.Provider>
+    <ChatContext.Provider value={{ socket }}>{children}</ChatContext.Provider>
   );
 };
 

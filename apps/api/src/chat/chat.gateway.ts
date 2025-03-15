@@ -29,7 +29,7 @@ export class ChatGateway
     private readonly prismaService: PrismaService,
     private chatService: ChatService,
   ) {}
-  afterInit(server: any) {
+  afterInit(_server: any) {
     Logger.log('Chat gateway initialized', 'ChatGateway');
   }
 

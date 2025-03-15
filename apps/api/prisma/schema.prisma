@@ -71,7 +71,7 @@ type FetchSetting {
   cronExpression String?
   matchPattern   String?
   excludePattern String?
-  filePattern    String?
+  filePattern    String[]
   maxUrlsToCrawl Int?
   maxDepth       Int?
 }
@@ -80,8 +80,14 @@ enum SourceStatus {
   CREATED
   PROCESSING
   PROCESSED
+  SYNCING
   SYNCED
   ERROR
+}
+
+type File {
+  name     String
+  url      String
 }
 
 model Source {
@@ -93,7 +99,7 @@ model Source {
   rootUrl      String?
   fetchSetting FetchSetting?
   sourceStatus SourceStatus  @default(CREATED)
-  files        String[]
+  files        File[]
   chatflowId   String        @db.ObjectId
   chatflow     Chatflow      @relation(fields: [chatflowId], references: [id], onDelete: Cascade)
   lastFetch    DateTime?

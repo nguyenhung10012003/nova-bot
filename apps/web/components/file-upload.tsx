@@ -57,6 +57,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onChange={(e) => {
           if (e.target.files) {
             onDrop(e.target.files);
+            e.target.value = '';
           }
         }}
         className="hidden"

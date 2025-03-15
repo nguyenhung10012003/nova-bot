@@ -3,13 +3,11 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import { Observable, Subject } from 'rxjs';
 import {
   getFileExtension,
-  getFileUrls,
   getPageHtml,
   isUrlInCollection,
   normalizeUrl,
   waitForXPath,
 } from './utils';
-import path from 'path';
 
 export type RequestHandler = (
   page: Page,
@@ -58,7 +56,7 @@ export class Crawler {
   constructor(options: CrawlerOptions) {
     this.requestHandler = options.requestHandler;
     this.maxUrlsToCrawl = options.maxUrlsToCrawl || 10;
-    this.maxConcurrencies = options.maxConcurrencies || 10;
+    this.maxConcurrencies = options.maxConcurrencies || 20;
   }
 
   async start(startUrls: string[]): Promise<void> {
@@ -145,69 +143,6 @@ export interface CrawlOptions {
   file?: {
     extensionMatch: string | string[];
   };
-}
-
-export async function crawl<T = any>(options: CrawlOptions): Promise<T[]> {
-  const dataset: T[] = [];
-  const crawler = new Crawler({
-    requestHandler: async (page, url, push) => {
-      // Wait for the selector to appear on the page
-      if (options.selector) {
-        if (options.selector.startsWith('/')) {
-          await waitForXPath(
-            page,
-            options.selector,
-            options.waitForSelectorTimeout ?? 1000,
-          );
-        } else {
-          await page.waitForSelector(options.selector, {
-            timeout: options.waitForSelectorTimeout ?? 1000,
-          });
-        }
-      }
-
-      // Get all the links on the page
-      const urls = await page.evaluate(() => {
-        const anchorElements = Array.from(document.querySelectorAll('a'));
-        return anchorElements.map((a) => {
-          const href = (a as HTMLAnchorElement).href;
-          if (href.startsWith('tel:') || href.startsWith('mailto:')) {
-            return '';
-          }
-          return new URL(href, window.location.origin).href;
-        });
-      });
-
-      if (options.match) {
-        const filteredUrls = urls.filter((link) => {
-          if (!link) return false;
-          if (Array.isArray(options.match)) {
-            return options.match.some((pattern) => minimatch(link, pattern));
-          } else {
-            return minimatch(link, options.match);
-          }
-        });
-        push(filteredUrls);
-      } else {
-        push(urls);
-      }
-
-      // Get the page title and content
-      const title = await page.title();
-      const content = await getPageHtml(
-        page,
-        options.selector,
-        options.ignoreSelector,
-      );
-
-      dataset.push({ url, title, content } as T);
-    },
-    maxUrlsToCrawl: options.maxUrlsToCrawl,
-    maxConcurrencies: options.maxConcurrencies,
-  });
-
-  await crawler.start(options.urls);
-  return dataset;
 }
 
 export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {

@@ -8,6 +8,8 @@ export default function SourceStatusBadge({ status }: { status: string }) {
       return <Badge variant="blue">Processing</Badge>;
     case 'PROCESSED':
       return <Badge variant="yellow">Processed</Badge>;
+    case 'SYNCING':
+      return <Badge variant="purple">Syncing</Badge>;
     case 'SYNCED':
       return <Badge variant="green">Synced</Badge>;
     case 'ERROR':

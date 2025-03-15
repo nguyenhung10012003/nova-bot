@@ -109,6 +109,7 @@ function createCrawlStreamServer() {
         },
         error: (error) => {
           // Xử lý lỗi
+          console.log('Error:', error);
           res.write(`event: error\ndata: ${JSON.stringify(error)}\n\n`);
           res.end();
           subscription.unsubscribe();

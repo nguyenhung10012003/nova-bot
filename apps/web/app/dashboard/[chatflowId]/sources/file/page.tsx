@@ -1,53 +1,77 @@
-'use client';
-import { FileUpload } from '@/components/file-upload';
-import { Source } from '@/components/source/source';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@nova/ui/components/ui/accordion';
+import { Source } from '@/@types/source';
+import { api } from '@/api/api';
+import { SourceDialog } from '@/components/source/source-dialog';
+import SourceStatusBadge from '@/components/source/source-status-badge';
+import { UpsertChatflow } from '@/components/source/upsert-chatflow';
+import { Badge } from '@nova/ui/components/ui/badge';
+import { Card } from '@nova/ui/components/ui/card';
+import Link from 'next/link';
 
-const acceptFileTypes = `
-    text/csv,
-    application/vnd.openxmlformats-officedocument.wordprocessingml.document,
-    application/pdf,
-    application/json,
-    application/vnd.openxmlformats-officedocument.presentationml.presentation,
-    text/plain,
-    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-  `;
+const getFileSources = async (chatflowId: string) => {
+  try {
+    const response = await api.get(
+      `/sources?chatflowId=${chatflowId}&type=FILE`,
+      {
+        next: {
+          tags: ['sources'],
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
 
-export default function Page() {
+export default async function Page({
+  params,
+}: {
+  params: {
+    chatflowId: string;
+  };
+}) {
+  const sources = await getFileSources(params.chatflowId);
+
   return (
-    <div className="flex flex-col">
-      <h1 className="text-2xl font-bold text-foreground">File sources</h1>
-      <div className="flex flex-col md:flex-row mt-8 gap-4">
-        <div className="flex basis-2/3 shrink-0 w-full flex-col">
-          <FileUpload className="w-full" accept={acceptFileTypes} />
-          <Accordion type="multiple" className="w-full">
-            <AccordionItem value={'selected-files'}>
-              <AccordionTrigger className="w-full text-lg font-semibold text-foreground">
-                Selected files
-              </AccordionTrigger>
-              <AccordionContent>
-                {Array.from({ length: 50 }, (_, index) => (
-                  <Source key={index} name={`File ${index + 1}`} onDelete={() => {}} link={`link-${index}`} />
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value={'included-files'}>
-              <AccordionTrigger className="w-full text-lg font-semibold text-foreground">
-                Already included files
-              </AccordionTrigger>
-              <AccordionContent>
-                <Source name="File 1" onDelete={() => {}} link="fds"></Source>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">File Sources</h1>
+        <div className="flex gap-2">
+          <UpsertChatflow chatflow={{ id: params.chatflowId }} />
+          <SourceDialog type="FILE" />
         </div>
-        <div className="basis-1/3 shrink-0 w-full">ád</div>
       </div>
+      {sources?.length ? (
+        <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+          {sources.map((source: Source, index: number) => (
+            <Card
+              key={index}
+              className="p-4 shadow-sm group hover:shadow-md hover:cursor-pointer transition-all duration-200"
+            >
+              <Link
+                href={`/dashboard/${params.chatflowId}/sources/file/${source.id}`}
+                prefetch={false}
+              >
+                <h3 className="font-semibold text-xl">{source.name}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {source.files?.reduce((acc, file) => {
+                    return acc.concat(file.name, ', ');
+                  }, '')}
+                </p>
+                <div className="mt-6 flex gap-2">
+                  <SourceStatusBadge status={source.sourceStatus} />
+                  <Badge variant={'secondary'}>
+                    {source.files?.length || 0} files
+                  </Badge>
+                </div>
+              </Link>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 }

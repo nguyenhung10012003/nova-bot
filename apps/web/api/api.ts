@@ -111,7 +111,7 @@ export class API {
     return this.request<DataType, ErrorType>(url, {
       ...init,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
       headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     });
   }
@@ -124,7 +124,7 @@ export class API {
     return this.request<DataType, ErrorType>(url, {
       ...init,
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
       headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     });
   }
@@ -137,8 +137,11 @@ export class API {
     return this.request<DataType, ErrorType>(url, {
       ...init,
       method: 'PATCH',
-      body: JSON.stringify(body),
-      headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+      body: body instanceof FormData ? body : JSON.stringify(body),
+      headers:
+        body instanceof FormData
+          ? { ...(init?.headers || {}) }
+          : { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     });
   }
 
@@ -188,7 +191,7 @@ api.interceptors.response.use(
         error: null,
       };
     }
-    return response.json()
+    return response.json();
   },
   async (error) => {
     console.error('Error fetch: ', error);

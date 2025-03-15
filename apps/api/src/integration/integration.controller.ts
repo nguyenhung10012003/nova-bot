@@ -56,7 +56,8 @@ export class IntegrationController {
       JSON.stringify({ redirectUrl, chatflowId }),
     );
     const clientId = this.config.get('FACEBOOK_APP_ID');
-    const scope = 'pages_show_list,pages_messaging';
+    const scope =
+      'pages_show_list,pages_messaging,pages_read_engagement,pages_manage_metadata';
     const url = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
     return res.redirect(url);
   }

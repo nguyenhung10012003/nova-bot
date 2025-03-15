@@ -13,7 +13,7 @@ export class CreateSourceDto {
     autoFetch?: boolean;
     matchPattern?: string;
     excludePattern?: string;
-    filePattern?: string;
+    filePattern?: string[];
     maxUrlsToCrawl?: number;
   };
 }

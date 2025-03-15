@@ -17,6 +17,7 @@ import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { StorageModule } from './storage/storage.module';
+import { WorkerModule } from './worker/worker.module';
 
 @Module({
   imports: [
@@ -42,8 +43,9 @@ import { StorageModule } from './storage/storage.module';
     SourcesModule,
     ChatModule,
     WebhookModule,
-    StorageModule,,
+    StorageModule,
     IntegrationModule,
+    WorkerModule,
   ],
   controllers: [AppController],
   providers: [

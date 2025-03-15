@@ -96,7 +96,7 @@ export function TimePicker({
           {formatTime()}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[240px] min-w-[150px] p-0">
+      <PopoverContent className="w-[180px] min-w-[150px] p-0">
         <div className="flex h-[300px] border-t">
           {/* Hours */}
           <div className="flex flex-col w-[60px]">
@@ -148,11 +148,11 @@ export function TimePicker({
 
           {/* AM/PM */}
           {is12HoursFormat && (
-            <div className="flex flex-col border-l w-[120px]">
+            <div className="flex flex-col border-l w-[60px]">
               <div className="flex items-center justify-center border-b py-2 font-medium">
                 &nbsp;
               </div>
-              <div className="flex h-[244px] items-start">
+              <div className="flex flex-col">
                 {periods.map((period) => (
                   <div
                     key={period}

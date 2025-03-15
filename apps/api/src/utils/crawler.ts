@@ -1,4 +1,4 @@
-import { Logger } from "@nestjs/common";
+import { Logger } from '@nestjs/common';
 
 export interface CrawlOptions {
   urls: string[];
@@ -11,7 +11,7 @@ export interface CrawlData {
   url: string;
   title?: string;
   content?: string;
-  type?: string;
+  type?: 'URL' | 'FILE';
 }
 
 /**
@@ -41,32 +41,40 @@ export class CrawlStreamClient {
   }): AsyncGenerator<CrawlData, void, unknown> {
     // Construct query string
     const queryParams = new URLSearchParams();
-    
+
     // Add URLs
-    params.urls.forEach(url => queryParams.append('urls', url));
-    
+    params.urls.forEach((url) => queryParams.append('urls', url));
+
     // Add match patterns
-    const matchPatterns = Array.isArray(params.match) 
-      ? params.match 
+    const matchPatterns = Array.isArray(params.match)
+      ? params.match
       : [params.match];
-    matchPatterns.forEach(match => queryParams.append('match', match));
-    
+    matchPatterns.forEach((match) => queryParams.append('match', match));
+
     // Add file match patterns if exists
     if (params.fileMatch) {
-      const fileMatchPatterns = Array.isArray(params.fileMatch) 
-        ? params.fileMatch 
+      const fileMatchPatterns = Array.isArray(params.fileMatch)
+        ? params.fileMatch
         : [params.fileMatch];
-      fileMatchPatterns.forEach(fileMatch => queryParams.append('fileMatch', fileMatch));
+      fileMatchPatterns.forEach((fileMatch) =>
+        queryParams.append('fileMatch', fileMatch),
+      );
     }
-    
+
     // Add max URLs to crawl
     if (params.maxUrlsToCrawl) {
       queryParams.append('maxUrlsToCrawl', params.maxUrlsToCrawl.toString());
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/stream?${queryParams.toString()}`, {
-        method: 'GET'
+      const response = await fetch(
+        `${this.baseUrl}/stream?${queryParams.toString()}`,
+        {
+          method: 'GET',
+        },
+      ).catch((error: Error) => {
+        // Handle network errors like ECONNRESET
+        throw new Error(`Network error: ${error.message || String(error)}`);
       });
 
       if (!response.ok) {
@@ -82,16 +90,27 @@ export class CrawlStreamClient {
       let buffer = '';
 
       while (true) {
-        const { done, value } = await reader.read();
+        let done = false;
+        let value;
+        
+        try {
+          const result = await reader.read();
+          done = result.done;
+          value = result.value;
+        } catch (error) {
+          // Handle errors during stream reading (like ECONNRESET)
+          console.error('Error reading from stream:', error);
+          throw new Error(`Stream read error: ${error instanceof Error ? error.message : String(error)}`);
+        }
 
         if (done) break;
 
         // Convert chunk to string and add to buffer
         buffer += new TextDecoder().decode(value);
-        
+
         // Split by double newline which separates SSE events
         const events = buffer.split('\n\n');
-        
+
         // Process complete events
         while (events.length > 1) {
           const event = events.shift();
@@ -99,15 +118,15 @@ export class CrawlStreamClient {
             // Handle different types of events
             const dataMatch = event.match(/data: (.+)/);
             const eventTypeMatch = event.match(/event: (\w+)/);
-            
+
             if (eventTypeMatch) {
               const eventType = eventTypeMatch[1];
-              
+
               if (eventType === 'complete') {
                 // End of stream
                 return;
               }
-              
+
               if (eventType === 'error') {
                 // Error event
                 const errorData = event.match(/data: (.+)/);
@@ -116,7 +135,7 @@ export class CrawlStreamClient {
                 }
               }
             }
-            
+
             // Data event
             if (dataMatch) {
               try {
@@ -124,6 +143,9 @@ export class CrawlStreamClient {
                 yield data;
               } catch (parseError) {
                 console.error('Error parsing event data:', parseError);
+                // Skip this event and continue with the next one
+                // This prevents the TypeError from propagating and breaking the stream
+                continue;
               }
             }
           }
@@ -146,20 +168,28 @@ export class CrawlStreamClient {
     maxUrlsToCrawl?: number;
   }): Promise<CrawlData[]> {
     const results: CrawlData[] = [];
-    
-    for await (const data of this.crawlStream(params)) {
-      results.push(data);
+
+    try {
+      for await (const data of this.crawlStream(params)) {
+        results.push(data);
+      }
+      return results;
+    } catch (error) {
+      // Log the error and return any results collected so far
+      console.error('Error during crawl:', error);
+      Logger.error(`Crawl error: ${error instanceof Error ? error.message : String(error)}`, 'CrawlStreamClient');
+      
+      // Return any results we've collected so far instead of failing completely
+      return results;
     }
-    
-    return results;
   }
 }
 
 export async function crawl(options: CrawlOptions) {
-  Logger.debug("Start crawl for urls: " + options.urls.join(", "), "Crawl");
+  Logger.debug('Start crawl for urls: ' + options.urls.join(', '), 'Crawl');
   const apiUrl = process.env.CRAWLER_API_URL || 'http://localhost:4000';
   const crawler = new CrawlStreamClient(apiUrl);
   const results = await crawler.crawl(options);
-  Logger.debug(`Crawl finished. Number of Result: ${results.length}`, "Crawl");
+  Logger.debug(`Crawl finished. Number of Result: ${results.length}`, 'Crawl');
   return results;
 }

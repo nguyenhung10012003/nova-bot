@@ -10,12 +10,17 @@ export interface Source {
     url: string;
     type: 'URL' | 'FILE';
   }[];
+  files?: {
+    name: string;
+    url: string;
+    size: number | string;
+  }[];
   fetchSetting?: {
     autoFetch?: boolean;
     cronExpression: string;
     matchPattern?: string;
     excludePattern?: string;
-    filePattern?: string;
+    filePattern?: string[];
     maxUrlsToCrawl?: number;
     maxDepth?: number;
   };

@@ -80,3 +80,7 @@ export async function downloadFileFromUrl(
     throw error;
   }
 }
+
+export function createMinimatchPattern(extensions: string[]) {
+  return `*.{${extensions.join(',')}}`;
+}
