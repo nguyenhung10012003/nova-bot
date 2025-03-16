@@ -2,6 +2,12 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
 import { v7 as uuidv7 } from 'uuid';
+import https from 'https';
+
+const agent = new https.Agent({
+  rejectUnauthorized: false, // Disable SSL verification
+});
+
 
 /**
  * Downloads a file from a given URL and saves it to the specified directory with an optional custom name.
@@ -42,11 +48,11 @@ export async function downloadFileFromUrl(
 ): Promise<string> {
   try {
     // Fetch the file from the URL
-    const response = await fetch(url);
+    const response = await fetch(url, {agent});
 
     // Check if the response is OK
     if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
+      throw new Error(`Failed to fetch file ${url}: ${response.statusText}`);
     }
 
     // Generate a random name using UUID v7 if no name is provided

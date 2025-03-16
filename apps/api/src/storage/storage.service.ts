@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { isValidUrl } from '@nova/utils';
 import fs from 'fs';
 import path from 'path';
 import { downloadFileFromUrl } from 'src/utils/file';
@@ -42,16 +41,11 @@ export class StorageService {
     options: SaveFileOptions = { path: '/' },
   ) {
     if (typeof file === 'string') {
-      if (isValidUrl(file)) {
-        const dirPath = path.join(this.baseStoragePath, options.path);
-        const fileExtension = path.extname(file);
-        const fileName = `${uuidv7()}${fileExtension}`;
-        await downloadFileFromUrl(file, { dirPath, name: fileName });
-
-        return `STORAGE::${options.path}/${fileName}`;
-      } else {
-        throw new Error('file must be a valid URL or a file object');
-      }
+      const dirPath = path.join(this.baseStoragePath, options.path);
+      const fileExtension = path.extname(file);
+      const fileName = `${uuidv7()}${fileExtension}`;
+      await downloadFileFromUrl(file, { dirPath, name: fileName });
+      return `STORAGE::${options.path}/${fileName}`;
     }
     const uuid = uuidv7();
     const fileName = `${uuid}-${options.fileName || file.originalname}`;

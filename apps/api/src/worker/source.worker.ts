@@ -2,22 +2,25 @@ import { Document } from '@langchain/core/documents';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Source } from '@prisma/client';
+import { Source, UrlType } from '@prisma/client';
 import { Job } from 'bullmq';
 import path from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StorageService } from 'src/storage/storage.service';
+import { TaskService } from 'src/task/task.service';
 import { crawl, CrawlData } from 'src/utils/crawler';
 import { loadDocs } from 'src/utils/document.loader';
-import { createMinimatchPattern } from 'src/utils/file';
 import { SOURCE_WORKER } from './constant';
 
-@Processor(SOURCE_WORKER)
+@Processor(SOURCE_WORKER, {
+  concurrency: 10,
+})
 export class SourceWorker extends WorkerHost {
   constructor(
     private readonly prismaService: PrismaService,
     private storageService: StorageService,
     private readonly configService: ConfigService,
+    private readonly taskService: TaskService,
   ) {
     super();
   }
@@ -25,18 +28,22 @@ export class SourceWorker extends WorkerHost {
     const source = job.data;
     try {
       await this.beforeProcess(source);
+      await job.updateProgress(10); // Cập nhật tiến trình
+
       if (source.type === 'WEBSITE') {
-        await this.processWebSource(source);
+        await this.processWebSource(source, job);
       } else if (source.type === 'FILE') {
-        await this.processFileSource(source);
+        await this.processFileSource(source, job);
       } else if (source.type === 'TEXT') {
-        await this.processTextSource(source);
+        await this.processTextSource(source, job);
       }
+
       await this.afterProcess(source);
+      await job.updateProgress(100);
       return true;
     } catch (e: any) {
       Logger.error(
-        `Failed when process source with id: ${source.id}`,
+        `Failed when processing source with id: ${source.id}`,
         e.stack,
         'SourceWorker',
       );
@@ -52,15 +59,16 @@ export class SourceWorker extends WorkerHost {
     }
   }
 
-  async processWebSource(source: Source & { refresh?: boolean }) {
+  async processWebSource(source: Source & { refresh?: boolean }, job: Job) {
     let urls: CrawlData[] = [];
     if (source.refresh) {
       urls = await crawl({
         urls: [source.rootUrl],
-        match: source.fetchSetting?.matchPattern || `${source.rootUrl}/*`,
+        match: source.fetchSetting?.matchPattern || `${source.rootUrl}/**`,
         maxUrlsToCrawl: source.fetchSetting?.maxUrlsToCrawl || 25,
+        exclude: source.fetchSetting?.excludePattern,
         fileMatch: source.fetchSetting?.filePattern
-          ? createMinimatchPattern(source.fetchSetting.filePattern)
+          ? source.fetchSetting.filePattern
           : '',
       });
     } else if (source.urls.length) {
@@ -68,11 +76,13 @@ export class SourceWorker extends WorkerHost {
         urls: source.urls.map((url) => url.url),
         match: source.fetchSetting?.matchPattern || `${source.rootUrl}/*`,
         maxUrlsToCrawl: source.fetchSetting?.maxUrlsToCrawl || 25,
+        exclude: source.fetchSetting?.excludePattern,
         fileMatch: source.fetchSetting?.filePattern
-          ? createMinimatchPattern(source.fetchSetting.filePattern)
+          ? source.fetchSetting.filePattern
           : '',
       });
     }
+    job.updateProgress(30);
 
     if (urls?.length) {
       const filesUrl: CrawlData[] = [];
@@ -86,25 +96,31 @@ export class SourceWorker extends WorkerHost {
           websUrl.push(url);
         }
       });
+      Logger.debug(
+        `Crawled ${filesUrl.length} files and ${websUrl.length} webs, source id: ${source.id}`,
+        'SourceWorker',
+      );
+      job.updateProgress(50);
 
       // Download all files and save to storage
       const files = (
-        await Promise.all(
+        await this.taskService.addTasks(
           filesUrl.map(async (url) => {
             try {
               const fileUrl = await this.storageService.saveFile(url.url);
               return { name: url.url, url: fileUrl };
-            } catch (e) {
-              Logger.error(
-                `Failed to save file from url: ${url.url}`,
-                e,
-                'SourceWorker',
-              );
+            } catch (_e) {
               return null;
             }
           }),
+          {
+            maxConcurrencies: 5,
+          },
         )
       ).filter((file) => file !== null);
+      Logger.debug(`Downloaded ${files.length} files`, 'SourceWorker');
+      job.updateProgress(70);
+
       const storageBasePath = this.configService.get('fileStoragePath');
       const fileDocument: Document[] = await loadDocs(
         files.map((file) => {
@@ -119,6 +135,7 @@ export class SourceWorker extends WorkerHost {
           }
         }),
       );
+      job.updateProgress(80);
 
       // Save all files and webs to database
       await this.prismaService.document.createMany({
@@ -149,7 +166,9 @@ export class SourceWorker extends WorkerHost {
           id: source.id,
         },
         data: {
-          urls: urls.map((url) => ({ url: url.url, type: url.type || 'URL' })),
+          urls: websUrl
+            .map((url) => ({ url: url.url, type: 'URL' as UrlType }))
+            .concat(files.map((file) => ({ url: file.name, type: 'FILE' }))),
           files: files,
         },
       });
@@ -190,7 +209,7 @@ export class SourceWorker extends WorkerHost {
     Logger.debug(`Processed source with id: ${source.id}`, 'Crawl worker');
   }
 
-  async processFileSource(source: Source) {
+  async processFileSource(source: Source, job: Job) {
     const files = source.files;
     if (files?.length) {
       const storageBasePath = this.configService.get('fileStoragePath');
@@ -207,6 +226,7 @@ export class SourceWorker extends WorkerHost {
           }
         }),
       );
+      job.updateProgress(80);
 
       await this.prismaService.document.createMany({
         data: fileDocument.map((doc) => ({
@@ -219,7 +239,7 @@ export class SourceWorker extends WorkerHost {
     }
   }
 
-  async processTextSource(source: Source) {
+  async processTextSource(source: Source, job: Job) {
     const document = new Document({
       pageContent: source.text,
       metadata: {
@@ -236,5 +256,6 @@ export class SourceWorker extends WorkerHost {
         chatflowId: source.chatflowId,
       },
     });
+    job.updateProgress(90);
   }
 }

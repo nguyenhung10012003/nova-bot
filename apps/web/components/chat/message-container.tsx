@@ -15,14 +15,13 @@ export function MessageContainer() {
     chatflowId: string;
   }>();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [botIsTyping, setBotIsTyping] = useState(false);
   const [scrollToNewMessage, setScrollToNewMessage] = useState<boolean | null>(
     null,
   );
-  const { socket } = useChat();
+  const { socket, messages, setMessages } = useChat();
 
   // load history messages
   useEffect(() => {
@@ -64,6 +63,10 @@ export function MessageContainer() {
           setScrollToNewMessage(true);
         },
       );
+
+      socket.on('chatSession', () => {
+        setMessages([]);
+      });
     }
 
     return () => {

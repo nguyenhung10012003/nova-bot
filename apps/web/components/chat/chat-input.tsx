@@ -26,7 +26,7 @@ const ChatInput: React.FC = ({
     chatflowId: string;
   }>();
 
-  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+  const {chatSessionId, setChatSessionId} = useChat();
 
   useEffect(() => {
     if (socket) {

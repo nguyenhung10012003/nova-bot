@@ -56,13 +56,13 @@ export class SourcesService implements OnModuleInit {
       data,
     });
 
-    await this.workerService.addJob(
-      SOURCE_WORKER,
-      `crawl-source-${source.id}`,
-      { ...source, refresh: true },
-    );
+    // await this.workerService.addJob(
+    //   SOURCE_WORKER,
+    //   `crawl-source-${source.id}`,
+    //   { ...source, refresh: true },
+    // );
     if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
-      this.schedulerService.addCronJob(
+      await this.schedulerService.addCronJob(
         `auto-crawl-${source.id}`,
         source.fetchSetting.cronExpression,
         async () => {

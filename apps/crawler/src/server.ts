@@ -1,6 +1,6 @@
+import dotenv from 'dotenv';
 import http from 'http';
 import url from 'url';
-import dotenv from 'dotenv';
 import { crawlStream } from './crawler/crawler';
 
 dotenv.config();
@@ -10,6 +10,7 @@ interface CrawlRequestQuery {
   match?: string | string[];
   fileMatch?: string | string[];
   maxUrlsToCrawl?: number;
+  exclude?: string | string[];
 }
 
 function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
@@ -21,7 +22,7 @@ function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
   const urls = Array.isArray(urlsParam)
     ? urlsParam
     : urlsParam
-      ? [urlsParam]
+      ? urlsParam.split(',')
       : [];
 
   // Parse match patterns
@@ -29,7 +30,7 @@ function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
   const match = Array.isArray(matchParam)
     ? matchParam
     : matchParam
-      ? [matchParam]
+      ? matchParam.split(',')
       : [];
 
   // Parse file match patterns
@@ -37,13 +38,20 @@ function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
   const fileMatch = Array.isArray(fileMatchParam)
     ? fileMatchParam
     : fileMatchParam
-      ? [fileMatchParam]
+      ? fileMatchParam.split(',')
       : [];
 
   // Parse max URLs to crawl
   const maxUrlsToCrawl = query.maxUrlsToCrawl
     ? parseInt(query.maxUrlsToCrawl as string, 10)
     : 25;
+
+  const excludeParam = query.exclude;
+  const exclude = Array.isArray(excludeParam)
+    ? excludeParam
+    : excludeParam
+      ? excludeParam.split(',')
+      : null;
 
   return {
     urls,
@@ -64,7 +72,7 @@ function createCrawlStreamServer() {
 
     try {
       // Parse query parameters
-      const { urls, match, fileMatch, maxUrlsToCrawl } = parseQueryParams(req);
+      const { urls, match, fileMatch, maxUrlsToCrawl, exclude } = parseQueryParams(req);
 
       // Validate required parameters
       if (!urls?.length || !match) {
@@ -82,6 +90,7 @@ function createCrawlStreamServer() {
         urls,
         match,
         maxUrlsToCrawl,
+        exclude,
         ...(fileMatch?.length
           ? {
               file: {

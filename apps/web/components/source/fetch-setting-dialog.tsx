@@ -60,6 +60,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
     const res = await api.patch(`/sources/${source.id}`, {
       fetchSetting: {
         ...source.fetchSetting,
+        matchPattern: data.match,
         maxUrlsToCrawl: data.maxUrls
           ? parseInt(data.maxUrls as string)
           : undefined,

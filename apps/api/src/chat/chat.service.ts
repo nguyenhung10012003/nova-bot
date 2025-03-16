@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { FlowiseApi, NoStreamResponse } from '@nova/flowise-api';
 import { PrismaService } from 'src/prisma/prisma.service';
-
 
 @Injectable()
 export class ChatService {
@@ -47,7 +46,10 @@ export class ChatService {
     });
   }
 
-  async getBotMessages(chatflowId: string, message: string): Promise<NoStreamResponse> {
+  async getBotMessages(
+    chatflowId: string,
+    message: string,
+  ): Promise<NoStreamResponse> {
     const chatflow = await this.prismaService.chatflow.findUnique({
       where: { id: chatflowId },
     });
@@ -57,12 +59,22 @@ export class ChatService {
       baseUrl: chatflow.baseUrl,
     });
 
-    const res = await flowise.createPrediction({
-      chatflowId: chatflow.chatflowId,
-      streaming: false,
-      question: message,
-    });
+    try {
+      const res: NoStreamResponse = await flowise.createPrediction({
+        chatflowId: chatflow.chatflowId,
+        streaming: false,
+        question: message,
+      });
+      if ('success' in res) {
+        if (res.success === false) throw new Error((res as any).message);
+      }
 
-    return res;
+      Logger.debug(`Bot response: ${JSON.stringify(res)}`, 'ChatService');
+
+      return res;
+    } catch (error: any) {
+      Logger.error(error, 'ChatService');
+      return { text: 'An error occurred. Please try again later' } as NoStreamResponse;
+    }
   }
 }

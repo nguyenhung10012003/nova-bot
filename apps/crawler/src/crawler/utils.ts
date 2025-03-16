@@ -171,7 +171,7 @@ export function getFileExtension(path: string): string {
 
     // Regex kiểm tra phần mở rộng file
     const fileExtensionRegex =
-      /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt)$/i;
+      /\.(pdf|jpg|jpeg|png|gif|docx?|xlsx?|txt|csv|mp3|mp4|zip|rar|doc|xls|pptx|ppt|ics|sql|dat|log)$/i;
 
     // Nếu không match với regex, trả về chuỗi rỗng
     if (!fileExtensionRegex.test(fileName.toLowerCase())) return '';

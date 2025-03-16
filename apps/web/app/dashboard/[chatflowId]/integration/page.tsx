@@ -23,10 +23,10 @@ export default async function Page({
 }) {
   const integrations = await getIntegration(params.chatflowId);
   return (
-    <div className="flex w-full px-4 pt-2 pb-8 flex-col gap-4">
+    <div className="flex w-full md:px-8 px-6 pt-2 pb-8 flex-col gap-4">
       <div>
-        <h1 className='text-2xl font-bold'>Connect to Chatbot</h1>
-        <p className='text-sm text-muted-foreground'>
+        <h1 className="text-2xl font-bold">Connect to Chatbot</h1>
+        <p className="text-sm text-muted-foreground">
           Connect chatbot with Facebook Page or Telegram bot to auto reply
           customer messages
         </p>

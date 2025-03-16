@@ -5,6 +5,7 @@ export interface CrawlOptions {
   match: string | string[];
   fileMatch?: string | string[];
   maxUrlsToCrawl?: number;
+  exclude?: string | string[];
 }
 
 export interface CrawlData {
@@ -37,6 +38,7 @@ export class CrawlStreamClient {
     urls: string[];
     match: string | string[];
     fileMatch?: string | string[];
+    exclude?: string | string[];
     maxUrlsToCrawl?: number;
   }): AsyncGenerator<CrawlData, void, unknown> {
     // Construct query string
@@ -64,6 +66,14 @@ export class CrawlStreamClient {
     // Add max URLs to crawl
     if (params.maxUrlsToCrawl) {
       queryParams.append('maxUrlsToCrawl', params.maxUrlsToCrawl.toString());
+    }
+
+    // Add exclude patterns if exists
+    if (params.exclude) {
+      const excludePatterns = Array.isArray(params.exclude)
+        ? params.exclude
+        : [params.exclude];
+      excludePatterns.forEach((exclude) => queryParams.append('exclude', exclude));
     }
 
     try {
@@ -166,6 +176,7 @@ export class CrawlStreamClient {
     match: string | string[];
     fileMatch?: string | string[];
     maxUrlsToCrawl?: number;
+    exclude?: string | string[];
   }): Promise<CrawlData[]> {
     const results: CrawlData[] = [];
 

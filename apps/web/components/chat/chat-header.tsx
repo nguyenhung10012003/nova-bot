@@ -21,6 +21,7 @@ import {
 } from '@nova/ui/components/ui/tooltip';
 import { Clock, Plus, Search, Trash } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useChat } from '../context/chat-context';
 
 type ChatHeaderProps = {
   title?: string;
@@ -33,8 +34,11 @@ export function ChatHeader({ title, chatSessions }: ChatHeaderProps) {
     chatflowId: string;
     chatSessionId: string;
   }>();
+  const chat = useChat();
 
   const handleNewSession = async () => {
+    chat.setChatSessionId(null);
+    chat.setMessages([]);
     router.push(`/dashboard/${chatflowId}/playground`);
   };
 
@@ -102,7 +106,9 @@ export function ChatHeader({ title, chatSessions }: ChatHeaderProps) {
                     }
                     className="flex-1 h-7 items-center flex"
                   >
-                    <span className='line-clamp-1'>{session.title || 'Untitled'}</span>
+                    <span className="line-clamp-1">
+                      {session.title || 'Untitled'}
+                    </span>
                   </div>
                   <Button
                     className="group-hover:visible flex invisible opacity-0 group-hover:opacity-100 transition-opacity duration-200"

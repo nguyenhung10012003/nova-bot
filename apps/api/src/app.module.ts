@@ -19,6 +19,7 @@ import { SourcesModule } from './sources/sources.module';
 import { StorageModule } from './storage/storage.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { WorkerModule } from './worker/worker.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { WorkerModule } from './worker/worker.module';
     IntegrationModule,
     WorkerModule,
     SchedulerModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [

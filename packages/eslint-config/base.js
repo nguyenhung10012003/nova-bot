@@ -19,8 +19,19 @@ module.exports = {
     'node_modules/',
   ],
   rules: {
-    '@typescript-eslint/no-unused-vars': 'warn',
     'prettier/prettier': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
-  }
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      },
+    ],
+    '@typescript-eslint/no-explicit-any': 'off',
+  },
 };

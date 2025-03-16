@@ -1,6 +1,6 @@
-import { minimatch } from 'minimatch';
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { Observable, Subject } from 'rxjs';
+import { checkExtensionMatch, checkUrlMatch } from '../utils/url';
 import {
   getFileExtension,
   getPageHtml,
@@ -13,6 +13,7 @@ export type RequestHandler = (
   page: Page,
   url: string,
   push: (urls: string[]) => void,
+  deleteUrl: (url: string) => void,
 ) => Promise<void>;
 
 export interface CrawlerOptions {
@@ -41,11 +42,7 @@ export interface CrawlerOptions {
  */
 export class Crawler {
   private browser: Browser | null = null;
-  private requestHandler: (
-    page: Page,
-    url: string,
-    push: (urls: string[]) => void,
-  ) => Promise<void>;
+  private requestHandler: RequestHandler;
   private maxUrlsToCrawl: number;
   private maxConcurrencies: number;
   private urlQueue: string[] = [];
@@ -103,8 +100,14 @@ export class Crawler {
       this.crawledUrls.add(url);
       page = await this.browser.newPage();
       await page.goto(url, { waitUntil: 'domcontentloaded' });
-      await this.requestHandler(page, url, this.push.bind(this));
+      await this.requestHandler(
+        page,
+        url,
+        this.push.bind(this),
+        this.deleteUrl.bind(this),
+      );
     } catch (error) {
+      this.crawledUrls.delete(url);
       console.error(`Error crawling ${url}:`, error);
     } finally {
       if (page) await page.close();
@@ -120,6 +123,10 @@ export class Crawler {
         this.urlQueue.push(normalizeUrl(url));
       }
     });
+  }
+
+  deleteUrl(url: string) {
+    this.crawledUrls.delete(url);
   }
 
   private async stop() {
@@ -149,33 +156,8 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
   const dataSubject = new Subject<T>();
 
   const crawler = new Crawler({
-    requestHandler: async (page, url, push) => {
+    requestHandler: async (page, url, push, deleteUrl) => {
       try {
-        // Kiểm tra nếu URL là file
-        const fileExtension = getFileExtension(url);
-
-        if (fileExtension) {
-          if (options.file && options.file.extensionMatch) {
-            // Kiểm tra extension file có match không
-            const isFileMatch = Array.isArray(options.file.extensionMatch)
-              ? options.file.extensionMatch.some((ext) => minimatch(url, ext))
-              : minimatch(url, options.file.extensionMatch);
-
-            if (isFileMatch) {
-              // Nếu match, emit data file và bỏ qua xử lý tiếp
-              dataSubject.next({
-                url,
-                type: 'FILE',
-                extension: fileExtension,
-              } as T);
-              return;
-            }
-          } else {
-            return;
-          }
-        }
-
-        // Nếu không phải file, tiếp tục xử lý web page
         // Wait for the selector to appear on the page
         if (options.selector) {
           if (options.selector.startsWith('/')) {
@@ -194,24 +176,35 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
         // Get all the links on the page
         const urls = await page.evaluate(() => {
           const anchorElements = Array.from(document.querySelectorAll('a'));
-          return anchorElements.map((a) => {
-            const href = (a as HTMLAnchorElement).href;
-            if (href.startsWith('tel:') || href.startsWith('mailto:')) {
-              return '';
-            }
-            return new URL(href, window.location.origin).href;
-          });
+          const uniqueUrls = new Set(
+            anchorElements.map((a) => {
+              const href = (a as HTMLAnchorElement).href;
+              if (href.startsWith('tel:') || href.startsWith('mailto:')) {
+                return '';
+              }
+              return new URL(href, window.location.origin).href;
+            }),
+          );
+          return Array.from(uniqueUrls);
         });
 
         let filteredUrls = urls;
-        if (options.match) {
+        if (options.match || options.file?.extensionMatch || options.exclude) {
           filteredUrls = urls.filter((link) => {
             if (!link) return false;
-            if (Array.isArray(options.match)) {
-              return options.match.some((pattern) => minimatch(link, pattern));
-            } else {
-              return minimatch(link, options.match);
+            if (!checkUrlMatch(link, options.match)) return false;
+            if (options.exclude && checkUrlMatch(link, options.exclude)) return false;
+
+            const fileExtension = getFileExtension(link);
+            if (fileExtension) {
+              if (
+                checkExtensionMatch(fileExtension, options.file?.extensionMatch)
+              ) {
+                dataSubject.next({ url: link, type: 'FILE' } as T);
+              }
+              return false;
             }
+            return true;
           });
           push(filteredUrls);
         }

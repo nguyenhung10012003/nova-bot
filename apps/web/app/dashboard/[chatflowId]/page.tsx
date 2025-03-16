@@ -51,7 +51,7 @@ export default function ChatflowPage({
     },
   ];
   return (
-    <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2 grid-cols-1 gap-4 px-4 py-2">
+    <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-2 grid-cols-1 gap-4 md:px-8 px-6 pt-2 pb-8">
       {widgets.map((widget, index) => {
         return (
           <Card key={index} className="py-3 px-3 shadow-md group">
