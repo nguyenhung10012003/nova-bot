@@ -1,26 +1,29 @@
 FROM node:20-alpine AS base
 
-ENV YARN_VERSION 4.6.0
-
 RUN apk update && apk upgrade && apk add --no-cache libc6-compat && apk add dumb-init
-RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 
 FROM base AS builder
 WORKDIR /app
 
+RUN yarn global add turbo
 COPY . .
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
-RUN yarn install --immutable
-RUN yarn build
+RUN turbo prune crawler --docker
 
-FROM base AS prod
-ENV NODE_ENV production
+FROM base AS installer
+WORKDIR /app
+# First install dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN yarn install --frozen-lockfile
+# Build the project and its dependencies
+COPY --from=builder /app/out/full/ .
 
-COPY package.json yarn.lock .yarnrc.yml ./
-RUN yarn install --immutable
-COPY --from=builder /app/dist dist
+RUN yarn turbo build --filter=crawler...
 
-ENV PORT 8080
-EXPOSE 8080
-CMD ["yarn", "run", "start"]
+FROM base AS runner
+WORKDIR /app
+
+COPY --from=installer /app .
+
+ENV PORT 4000
+EXPOSE 4000
+CMD node apps/crawler/dist/server.js

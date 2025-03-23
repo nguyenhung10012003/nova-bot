@@ -94,7 +94,7 @@ model Source {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   type         SourceType
-  text         String?
+  text         String[]
   urls         Url[]
   rootUrl      String?
   fetchSetting FetchSetting?

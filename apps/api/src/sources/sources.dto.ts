@@ -2,7 +2,7 @@ export class CreateSourceDto {
   name: string;
   type: 'WEBSITE' | 'FILE' | 'TEXT';
   rootUrl?: string;
-  text?: string;
+  text?: string[];
   chatflowId: string;
   urls?: {
     url: string;

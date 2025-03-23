@@ -1,27 +1,55 @@
 services:
   web:
-    container_name: web
+    container_name: nova-web
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
+      args:
+        - NODE_ENV=production
+        - PORT=3001
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     restart: always
     ports:
       - 3001:3001
+    environment:
+      - name=value
     networks:
-      - app_network
+      - nova_network
   api:
-    container_name: api
+    container_name: nova-api
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
     restart: always
     ports:
       - 3000:3000
+    environment:
+      - NODE_ENV=production
+      - TIMEZONE=UTC
+      - BASE_URL=${BASE_URL}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - CRAWLER_API_URL=${CRAWLER_API_URL}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+      - FACEBOOK_WEBHOOK_VERIFY_TOKEN=${FACEBOOK_WEBHOOK_VERIFY_TOKEN}
     networks:
-      - app_network
+      - nova_network
+
+  crawler:
+    container_name: nova-crawler
+    build:
+      context: .
+      dockerfile: ./apps/crawler/Dockerfile
+    restart: always
+    networks:
+      - nova_network
 
 # Define a network, which allows containers to communicate
 # with each other, by using their container name as a hostname
 networks:
-  app_network:
+  nova_network:
     external: true

@@ -2,12 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import fs from 'fs';
 import path from 'path';
-import { downloadFileFromUrl } from 'src/utils/file';
+import { downloadFileFromUrl, getFileMetadata } from 'src/utils/file';
 import { v7 as uuidv7 } from 'uuid';
 
 export interface SaveFileOptions {
   path?: string;
   fileName?: string;
+  validation?: SaveFileValidation;
+}
+
+export interface SaveFileValidation {
+  maxSize?: number;
+  allowedMimeTypes?: string[];
 }
 
 export interface GetFileOptions extends SaveFileOptions {
@@ -41,11 +47,21 @@ export class StorageService {
     options: SaveFileOptions = { path: '/' },
   ) {
     if (typeof file === 'string') {
-      const dirPath = path.join(this.baseStoragePath, options.path);
+      if (options.validation) {
+        const isValid = await this.validateFileMetadata(
+          file,
+          options.validation,
+        );
+        if (!isValid) {
+          return null;
+        }
+      }
+      const dirPath = path.join(this.baseStoragePath, options.path || '');
       const fileExtension = path.extname(file);
       const fileName = `${uuidv7()}${fileExtension}`;
+
       await downloadFileFromUrl(file, { dirPath, name: fileName });
-      return `STORAGE::${options.path}/${fileName}`;
+      return `STORAGE::${options.path || ''}/${fileName}`;
     }
     const uuid = uuidv7();
     const fileName = `${uuid}-${options.fileName || file.originalname}`;
@@ -67,5 +83,31 @@ export class StorageService {
     await fs.promises.unlink(filePath);
 
     return true;
+  }
+
+  async validateFileMetadata(url: string, validation: SaveFileValidation) {
+    try {
+      const metadata = await getFileMetadata(url);
+      if (!metadata) {
+        return false;
+      } else {
+        if (
+          validation.maxSize &&
+          (metadata.contentLength === 'Unknown' ||
+            Number(metadata.contentLength) > validation.maxSize)
+        ) {
+          return false;
+        }
+        if (
+          validation.allowedMimeTypes &&
+          !validation.allowedMimeTypes.includes(metadata.contentType)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    } catch (_error) {
+      return false;
+    }
   }
 }

@@ -193,7 +193,8 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
           filteredUrls = urls.filter((link) => {
             if (!link) return false;
             if (!checkUrlMatch(link, options.match)) return false;
-            if (options.exclude && checkUrlMatch(link, options.exclude)) return false;
+            if (options.exclude && checkUrlMatch(link, options.exclude))
+              return false;
 
             const fileExtension = getFileExtension(link);
             if (fileExtension) {

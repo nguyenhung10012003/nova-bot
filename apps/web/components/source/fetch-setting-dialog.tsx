@@ -21,9 +21,10 @@ import {
 import { Input } from '@nova/ui/components/ui/input';
 import { toast } from '@nova/ui/components/ui/sonner';
 import { Switch } from '@nova/ui/components/ui/switch';
-import { PickaxeIcon, Settings } from 'lucide-react';
+import { PickaxeIcon } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { LabelWithHelp } from '../label-with-help';
+import MultiStringInput from '../muti-string-input';
 import RecurringTimeSelector from '../recurring-time-selector';
 
 type FetchSettingDialogProps = {
@@ -49,6 +50,16 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
   const [filePattern, setFilePattern] = useState(
     source.fetchSetting?.filePattern || [],
   );
+  const [matchPattern, setMatchPattern] = useState(
+    source.fetchSetting?.matchPattern
+      ? source.fetchSetting?.matchPattern?.split(',')
+      : [],
+  );
+  const [excludePattern, setExcludePattern] = useState(
+    source.fetchSetting?.excludePattern
+      ? source.fetchSetting?.excludePattern?.split(',')
+      : [],
+  );
   const [recurrence, setRecurrence] = useState<RecurrenceState | null>(
     parseCronString(source.fetchSetting?.cronExpression || ''),
   );
@@ -60,12 +71,13 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
     const res = await api.patch(`/sources/${source.id}`, {
       fetchSetting: {
         ...source.fetchSetting,
-        matchPattern: data.match,
+        matchPattern: matchPattern.length ? matchPattern.join(',') : '',
+        excludePattern: excludePattern.length ? excludePattern.join(',') : '',
         maxUrlsToCrawl: data.maxUrls
           ? parseInt(data.maxUrls as string)
           : undefined,
         autoFetch: autoCrawl,
-        filePattern: includeFilePattern ? filePattern : undefined,
+        filePattern: includeFilePattern ? filePattern : '',
         cronExpression: autoCrawl ? generateCronString(recurrence) : undefined,
       },
     });
@@ -80,10 +92,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={false}>
       <DialogTrigger asChild>
-        <Button
-          className="gap-2 px-2 justify-start"
-          variant={'ghost'}
-        >
+        <Button className="gap-2 px-2 justify-start" variant={'ghost'}>
           <PickaxeIcon className="w-5 h-5" />
           <span>Crawl Setting</span>
         </Button>
@@ -100,7 +109,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
           onSubmit={handleSave}
           className="px-6 pb-6 pt-4 flex flex-col gap-4"
         >
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             <div className="space-y-1">
               <LabelWithHelp
                 label="Match pattern"
@@ -112,11 +121,14 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Input
-                type="text"
-                id="match"
-                name="match"
-                defaultValue={source.fetchSetting?.matchPattern}
+              <MultiStringInput
+                strs={matchPattern}
+                onAddTag={(tag) => {
+                  setMatchPattern([...matchPattern, tag]);
+                }}
+                onRemoveTag={(tag) => {
+                  setMatchPattern(matchPattern.filter((t) => t !== tag));
+                }}
               />
             </div>
             <div className="space-y-1">
@@ -130,11 +142,14 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
                   </p>
                 }
               />
-              <Input
-                type="text"
-                id="exclude"
-                name="exclude"
-                defaultValue={source.fetchSetting?.excludePattern}
+              <MultiStringInput
+                strs={excludePattern}
+                onAddTag={(tag) => {
+                  setExcludePattern([...excludePattern, tag]);
+                }}
+                onRemoveTag={(tag) => {
+                  setExcludePattern(excludePattern.filter((t) => t !== tag));
+                }}
               />
             </div>
             <div className="space-y-1">

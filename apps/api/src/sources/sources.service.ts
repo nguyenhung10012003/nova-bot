@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { File } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SchedulerService } from 'src/scheduler/scheduler.service';
-import { SOURCE_WORKER } from 'src/worker/constant';
+import { CRAWL_WORKER } from 'src/worker/constant';
 import { WorkerService } from 'src/worker/worker.service';
 import { CreateSourceDto } from './sources.dto';
 
@@ -17,13 +17,16 @@ export class SourcesService implements OnModuleInit {
   async onModuleInit() {
     const sources = await this.prisma.source.findMany();
     for (const source of sources) {
-      if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
+      if (
+        source.fetchSetting?.autoFetch &&
+        source.fetchSetting?.cronExpression
+      ) {
         this.schedulerService.addCronJob(
           `auto-crawl-${source.id}`,
           source.fetchSetting.cronExpression,
           async () => {
             await this.workerService.addJob(
-              SOURCE_WORKER,
+              CRAWL_WORKER,
               `crawl-source-${source.id}`,
               { ...source, refresh: true },
             );
@@ -67,7 +70,7 @@ export class SourcesService implements OnModuleInit {
         source.fetchSetting.cronExpression,
         async () => {
           await this.workerService.addJob(
-            SOURCE_WORKER,
+            CRAWL_WORKER,
             `crawl-source-${source.id}`,
             { ...source, refresh: true },
           );
@@ -104,7 +107,7 @@ export class SourcesService implements OnModuleInit {
         source.fetchSetting.cronExpression,
         async () => {
           await this.workerService.addJob(
-            SOURCE_WORKER,
+            CRAWL_WORKER,
             `crawl-source-${source.id}`,
             { ...source, refresh: true },
           );
@@ -125,10 +128,11 @@ export class SourcesService implements OnModuleInit {
     if (!source) {
       throw new Error('Source not found');
     }
-    this.workerService.addJob(SOURCE_WORKER, `crawl-source-${source.id}`, {
+    this.workerService.addJob(CRAWL_WORKER, `crawl-source-${source.id}`, {
       ...source,
       refresh: true,
     });
+    // await this.workerService.addSourceFlow({ ...source, refresh: true });
     return source;
   }
 

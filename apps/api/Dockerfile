@@ -25,6 +25,7 @@ RUN yarn install --frozen-lockfile
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
+RUN yarn prisma:generate
 
 # Uncomment and use build args to enable remote caching
 # ARG TURBO_TEAM
@@ -44,4 +45,4 @@ RUN adduser --system --uid 1001 nestjs
 USER nestjs
 COPY --from=installer /app .
 
-CMD node apps/api/dist/src/main.js
+CMD node apps/api/dist/main.js

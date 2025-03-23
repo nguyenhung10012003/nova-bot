@@ -10,13 +10,13 @@ import { MultiFileLoader } from 'langchain/document_loaders/fs/multi_file';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 
 const documentLoaderMapping = {
-  '.json': (path: string) => new JSONLoader(path, '/texts'),
+  '.json': (path: string) => new JSONLoader(path),
   '.jsonl': (path: string) => new JSONLinesLoader(path, '/html'),
   '.txt': (path: string) => new TextLoader(path),
   '.md': (path: string) => new TextLoader(path),
-  '.csv': (path: string) => new CSVLoader(path, 'text'),
-  '.xlsx': (path: string) => new CSVLoader(path, 'text'),
-  '.xls': (path: string) => new CSVLoader(path, 'text'),
+  '.csv': (path: string) => new CSVLoader(path),
+  '.xlsx': (path: string) => new CSVLoader(path),
+  '.xls': (path: string) => new CSVLoader(path),
   '.docx': (path: string) => new DocxLoader(path),
   '.doc': (path: string) => new DocxLoader(path),
   '.pdf': (path: string) => new PDFLoader(path),

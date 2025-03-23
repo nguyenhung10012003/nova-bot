@@ -8,10 +8,14 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "minimatch": "^10.0.1",
-    "puppeteer": "23.10.4"
+    "puppeteer": "23.10.4",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nova/eslint-config": "*",
+    "@nova/typescript-config": "*",
     "@types/node": "^22.13.1",
+    "eslint": "^8",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"

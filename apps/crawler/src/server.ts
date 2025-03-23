@@ -51,12 +51,13 @@ function parseQueryParams(req: http.IncomingMessage): CrawlRequestQuery {
     ? excludeParam
     : excludeParam
       ? excludeParam.split(',')
-      : null;
+      : undefined;
 
   return {
     urls,
     match,
     fileMatch,
+    exclude,
     maxUrlsToCrawl,
   };
 }
@@ -72,7 +73,8 @@ function createCrawlStreamServer() {
 
     try {
       // Parse query parameters
-      const { urls, match, fileMatch, maxUrlsToCrawl, exclude } = parseQueryParams(req);
+      const { urls, match, fileMatch, maxUrlsToCrawl, exclude } =
+        parseQueryParams(req);
 
       // Validate required parameters
       if (!urls?.length || !match) {

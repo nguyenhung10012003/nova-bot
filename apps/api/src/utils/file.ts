@@ -1,13 +1,35 @@
 import fs from 'fs';
+import https from 'https';
 import fetch from 'node-fetch';
 import path from 'path';
 import { v7 as uuidv7 } from 'uuid';
-import https from 'https';
 
 const agent = new https.Agent({
   rejectUnauthorized: false, // Disable SSL verification
 });
 
+export const getFileMetadata = async (url: string) => {
+  try {
+    const response = await fetch(url, { method: 'HEAD', agent });
+
+    if (!response.ok) {
+      throw new Error(`URL: ${url}. HTTP error! Status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('Content-Type') || 'Unknown';
+    const contentLength = response.headers.get('Content-Length') || 'Unknown';
+
+    return {
+      url,
+      contentType,
+      contentLength:
+        contentLength !== 'Unknown' ? Number(contentLength) : contentLength,
+    };
+  } catch (error) {
+    console.error('Error fetching metadata:', error);
+    return null;
+  }
+};
 
 /**
  * Downloads a file from a given URL and saves it to the specified directory with an optional custom name.
@@ -48,7 +70,7 @@ export async function downloadFileFromUrl(
 ): Promise<string> {
   try {
     // Fetch the file from the URL
-    const response = await fetch(url, {agent});
+    const response = await fetch(url, { agent });
 
     // Check if the response is OK
     if (!response.ok) {
