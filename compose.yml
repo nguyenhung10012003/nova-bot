@@ -46,6 +46,8 @@ services:
       context: .
       dockerfile: ./apps/crawler/Dockerfile
     restart: always
+    ports:
+      - 4000:4000
     networks:
       - nova_network
 
