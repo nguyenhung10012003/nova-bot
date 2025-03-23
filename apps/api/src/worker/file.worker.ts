@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Source, UrlType } from '@prisma/client';
 import { Job } from 'bullmq';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StorageService } from 'src/storage/storage.service';
+import { StorageService } from 'src/storage-disk/storage.service';
 import { TaskService } from 'src/task/task.service';
 import { CrawlData } from 'src/utils/crawler';
 import { DOCUMENT_WORKER, FILE_WORKER } from './constant';

@@ -16,10 +16,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { SchedulerService } from './scheduler/scheduler.service';
 import { SourcesModule } from './sources/sources.module';
-import { StorageModule } from './storage/storage.module';
+import { StorageModule } from './storage-disk/storage.module';
+import { TaskModule } from './task/task.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { WorkerModule } from './worker/worker.module';
-import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [

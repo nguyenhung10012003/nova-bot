@@ -15,7 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AccessTokenGuard } from 'src/common/guards/access-token.guard';
 import { ALLOWED_DOCUMENT_FILE_TYPES } from 'src/constant';
-import { StorageService } from 'src/storage/storage.service';
+import { StorageService } from 'src/storage-disk/storage.service';
 import { CreateSourceDto } from './sources.dto';
 import { SourcesService } from './sources.service';
 
