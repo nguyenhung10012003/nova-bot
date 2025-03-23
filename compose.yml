@@ -45,6 +45,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/crawler/Dockerfile
+      platforms:
+        - linux/amd64
     restart: always
     ports:
       - 4000:4000

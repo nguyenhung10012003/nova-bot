@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser, LaunchOptions, Page } from 'puppeteer';
 import { Observable, Subject } from 'rxjs';
 import { checkExtensionMatch, checkUrlMatch } from '../utils/url';
 import {
@@ -20,6 +20,7 @@ export interface CrawlerOptions {
   requestHandler: RequestHandler;
   maxUrlsToCrawl?: number;
   maxConcurrencies?: number;
+  launchOptions?: LaunchOptions;
 }
 
 /**
@@ -48,17 +49,28 @@ export class Crawler {
   private urlQueue: string[] = [];
   private activeCrawls: number = 0;
   private crawledUrls: Set<string> = new Set();
+  private launchOptions: LaunchOptions;
   private isRunning: boolean = false; // Để ngăn việc đóng trình duyệt khi còn URL cần xử lý
 
   constructor(options: CrawlerOptions) {
     this.requestHandler = options.requestHandler;
     this.maxUrlsToCrawl = options.maxUrlsToCrawl || 10;
     this.maxConcurrencies = options.maxConcurrencies || 20;
+    this.launchOptions = options.launchOptions || {
+      headless: !process.env.PUPPETEER_HEADLESS,
+      executablePath: process.env.PUPPETEER_EXCUATABLE_PATH,
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-sandbox',
+      ],
+    };
   }
 
   async start(startUrls: string[]): Promise<void> {
     this.push(startUrls);
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch(this.launchOptions);
     this.isRunning = true;
 
     return new Promise<void>((resolve) => {
