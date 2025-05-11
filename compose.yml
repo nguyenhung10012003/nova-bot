@@ -49,7 +49,7 @@ services:
         - linux/amd64
     restart: unless-stopped
     ports:
-      - 4000:4000
+      - 4001:4000
     # networks:
     #   - nova_network
 
