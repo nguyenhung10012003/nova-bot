@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Query,
@@ -41,6 +42,7 @@ export class IntegrationController {
         chatflowId,
       });
     } catch (error) {
+      Logger.error(error, 'Facebook auth callback error');
       return res.redirect(redirectUrl);
     }
 

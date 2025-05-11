@@ -105,10 +105,21 @@ export default function IntegrationTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleToggleIntegration(integration)}>
+              <DropdownMenuItem
+                onClick={() => handleOpenPage(integration)}
+              >
+                Open Page
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleToggleIntegration(integration)}
+              >
                 {integration.status === 'ENABLED' ? 'Disable' : 'Enable'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDeleteIntegration(integration)}>Delete</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDeleteIntegration(integration)}
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -131,6 +142,10 @@ export default function IntegrationTable({
       pagination,
     },
   });
+
+  const handleOpenPage = (integration: Integration) => {
+    window.open(`https://www.facebook.com/${integration.pageId}`, '_blank');
+  }
 
   const handleConnectFacebook = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/integration/facebook/connect?chatflowId=${chatflowId}&redirectUrl=${window.location.href}`;
