@@ -14,6 +14,7 @@ import {
   DOCUMENT_WORKER,
   FILE_WORKER,
   QueueName,
+  UNSTRUCTURED_WORKER,
 } from './constant';
 
 export interface FlowJob<T = any> extends FlowJobBase<JobsOptions> {
@@ -29,6 +30,7 @@ export class WorkerService {
     private sourceWorker: Queue<Source & { refresh?: boolean }>,
     @InjectQueue(FILE_WORKER) private fileWorker: Queue,
     @InjectQueue(DOCUMENT_WORKER) private documentWorker: Queue,
+    @InjectQueue(UNSTRUCTURED_WORKER) private unstructuredWorker: Queue,
     private readonly configService: ConfigService,
   ) {
     this.flowProducer = new FlowProducer({
@@ -44,7 +46,10 @@ export class WorkerService {
     queueName: QueueName,
     jobName: string,
     data: T,
-    options?: JobsOptions,
+    options: JobsOptions = {
+      removeOnComplete: true,
+      removeOnFail: true,
+    },
   ) {
     Logger.debug(`Add job ${jobName} to queue ${queueName}`, 'WorkerService');
     switch (queueName) {
@@ -52,20 +57,16 @@ export class WorkerService {
         return this.sourceWorker.add(
           jobName,
           data as Source & { refresh?: boolean },
-          { removeOnComplete: true, removeOnFail: true, ...options },
+          options,
         );
       case FILE_WORKER:
-        return this.fileWorker.add(jobName, data, {
-          removeOnComplete: true,
-          removeOnFail: true,
-          ...options,
-        });
+        return this.fileWorker.add(jobName, data, options);
       case DOCUMENT_WORKER:
-        return this.documentWorker.add(jobName, data, {
-          removeOnComplete: true,
-          removeOnFail: true,
-          ...options,
-        });
+        return this.documentWorker.add(jobName, data, options);
+      case UNSTRUCTURED_WORKER:
+        return this.unstructuredWorker.add(jobName, data, options);
+      default:
+        break;
     }
   }
 

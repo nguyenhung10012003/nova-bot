@@ -7,6 +7,7 @@ import { crawl, CrawlData } from 'src/utils/crawler';
 import { CRAWL_WORKER, FILE_WORKER } from './constant';
 import { WorkerService } from './worker.service';
 
+const MAX_FILES_TO_CRAWL = 30;
 @Processor(CRAWL_WORKER, {
   concurrency: 10,
 })
@@ -71,7 +72,10 @@ export class CrawlWorker extends WorkerHost {
       urls = await crawl({
         urls: source.urls.map((url) => url.url),
         match: source.fetchSetting?.matchPattern || `${source.rootUrl}/*`,
-        maxUrlsToCrawl: source.fetchSetting?.maxUrlsToCrawl || 25,
+        maxUrlsToCrawl: Math.min(
+          source.fetchSetting?.maxUrlsToCrawl || 25,
+          source.urls.length,
+        ),
         exclude: source.fetchSetting?.excludePattern,
         fileMatch: source.fetchSetting?.filePattern
           ? source.fetchSetting.filePattern
@@ -86,7 +90,7 @@ export class CrawlWorker extends WorkerHost {
       // Split urls into files and webs
       urls.forEach((url) => {
         if (url.type === 'FILE') {
-          filesUrl.push(url);
+          if (filesUrl?.length < MAX_FILES_TO_CRAWL) filesUrl.push(url);
         } else {
           websUrl.push(url);
         }

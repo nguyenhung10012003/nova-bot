@@ -40,6 +40,7 @@
     "class-validator": "^0.14.1",
     "crawlee": "^3.0.0",
     "d3-dsv": "^3.0.1",
+    "firebase-admin": "^13.3.0",
     "ioredis": "^5.4.2",
     "langchain": "^0.3.6",
     "mammoth": "^1.9.0",
@@ -51,6 +52,7 @@
     "playwright": "*",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "unstructured-client": "^0.24.1",
     "uuid": "^11.1.0",
     "uuidv7": "^1.0.2"
   },

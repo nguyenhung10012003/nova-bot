@@ -84,6 +84,7 @@ export class SourcesService implements OnModuleInit {
   async updateSource(
     id: string,
     data: Partial<CreateSourceDto> & { files?: File[] },
+    renewDocs?: boolean,
   ) {
     const source = await this.prisma.source.update({
       where: { id },
@@ -115,6 +116,13 @@ export class SourcesService implements OnModuleInit {
       );
     } else {
       await this.schedulerService.removeCronJob(`auto-crawl-${source.id}`);
+    }
+
+    if (renewDocs) {
+      await this.workerService.addJob(CRAWL_WORKER, `crawl-source-${source.id}`, {
+        ...source,
+        refresh: false,
+      });
     }
 
     return source;

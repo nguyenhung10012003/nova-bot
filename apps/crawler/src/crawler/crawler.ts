@@ -120,6 +120,7 @@ export class Crawler {
       );
     } catch (error) {
       this.crawledUrls.delete(url);
+      this.maxUrlsToCrawl++;
       console.error(`Error crawling ${url}:`, error);
     } finally {
       if (page) await page.close();
@@ -134,6 +135,12 @@ export class Crawler {
       ) {
         this.urlQueue.push(normalizeUrl(url));
       }
+    });
+  }
+
+  addToCrawledUrls(urls: string[]) {
+    urls.forEach((url) => {
+      this.crawledUrls.add(url);
     });
   }
 
@@ -168,7 +175,7 @@ export function crawlStream<T = any>(options: CrawlOptions): Observable<T> {
   const dataSubject = new Subject<T>();
 
   const crawler = new Crawler({
-    requestHandler: async (page, url, push, deleteUrl) => {
+    requestHandler: async (page, url, push, _deleteUrl) => {
       try {
         // Wait for the selector to appear on the page
         if (options.selector) {

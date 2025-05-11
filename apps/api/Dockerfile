@@ -21,6 +21,7 @@ WORKDIR /app
 
 # First install dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
+ENV NODE_ENV=production
 RUN yarn install --frozen-lockfile
 
 # Build the project and its dependencies

@@ -8,19 +8,19 @@ services:
         - NODE_ENV=production
         - PORT=3001
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    restart: always
+    restart: unless-stopped
     ports:
       - 3001:3001
     environment:
       - name=value
-    networks:
-      - nova_network
+    # networks:
+    #   - nova_network
   api:
     container_name: nova-api
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
-    restart: always
+    restart: unless-stopped
     ports:
       - 3002:3002
     environment:
@@ -37,8 +37,8 @@ services:
       - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
       - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
       - FACEBOOK_WEBHOOK_VERIFY_TOKEN=${FACEBOOK_WEBHOOK_VERIFY_TOKEN}
-    networks:
-      - nova_network
+    # networks:
+    #   - nova_network
 
   crawler:
     container_name: nova-crawler
@@ -47,14 +47,14 @@ services:
       dockerfile: ./apps/crawler/Dockerfile
       platforms:
         - linux/amd64
-    restart: always
+    restart: unless-stopped
     ports:
       - 4000:4000
-    networks:
-      - nova_network
+    # networks:
+    #   - nova_network
 
-# Define a network, which allows containers to communicate
-# with each other, by using their container name as a hostname
-networks:
-  nova_network:
-    external: true
+# # Define a network, which allows containers to communicate
+# # with each other, by using their container name as a hostname
+# networks:
+#   nova_network:
+#     external: true

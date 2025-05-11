@@ -3,10 +3,13 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Source } from '@prisma/client';
 import { Job } from 'bullmq';
-import path from 'path';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { StorageService } from 'src/storage-disk/storage.service';
+import { extractDocument } from 'src/unstructured/unstructured.api';
 import { CrawlData } from 'src/utils/crawler';
-import { loadDocs } from 'src/utils/document.loader';
+import { Strategy } from 'unstructured-client/sdk/models/shared';
 import { DOCUMENT_WORKER } from './constant';
 
 export type DocumentWorkerJobType = Job<{
@@ -21,6 +24,7 @@ export class DocumentWorker extends WorkerHost {
   constructor(
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
   ) {
     super();
   }
@@ -30,26 +34,24 @@ export class DocumentWorker extends WorkerHost {
 
     try {
       const storageBasePath = this.configService.get('fileStoragePath');
-      const fileDocument = await loadDocs(
-        source.files.map((file) => {
-          if (file.url.startsWith('STORAGE::')) {
-            const filePath = path.join(
-              storageBasePath,
-              file.url.replace('STORAGE::', ''),
-            );
-            return filePath;
-          } else {
-            return file.url;
-          }
+      const partitions = await Promise.all(
+        source.files.map(async (file) => {
+          const path = file.url.startsWith('STORAGE::')
+            ? join(storageBasePath, file.url.replace('STORAGE::', ''))
+            : file.url;
+          const documents = await this.unstructuredLoadDocs(path, file.name);
+          return documents;
         }),
       );
+
+      const documents = partitions.flat();
 
       // Save all files and webs to database
       const batch = await this.prismaService.document.createMany({
         data:
-          fileDocument
-            ?.map((doc) => ({
-              pageContent: doc.pageContent,
+          documents
+            ?.map((doc: any) => ({
+              pageContent: doc.text,
               metadata: JSON.stringify(doc.metadata),
               sourceId: source.id,
               chatflowId: source.chatflowId,
@@ -96,6 +98,28 @@ export class DocumentWorker extends WorkerHost {
         },
       });
       return null;
+    }
+  }
+
+  async unstructuredLoadDocs(path: string, name: string) {
+    try {
+      const data = readFileSync(path);
+      const documents = await extractDocument({
+        files: {
+          content: data,
+          fileName: name,
+        },
+        chunkingStrategy: 'by_title',
+        strategy: Strategy.Auto,
+        languages: ['vie'],
+        overlap: 200,
+        newAfterNChars: 1500,
+        maxCharacters: 1000,
+      });
+
+      return documents;
+    } catch (_e) {
+      return [];
     }
   }
 }

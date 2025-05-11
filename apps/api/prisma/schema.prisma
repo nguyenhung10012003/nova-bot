@@ -83,16 +83,18 @@ enum SourceStatus {
   SYNCING
   SYNCED
   ERROR
+  DISABLED
 }
 
 type File {
-  name     String
-  url      String
+  name String
+  url  String
 }
 
 model Source {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
+  description  String?
   type         SourceType
   text         String[]
   urls         Url[]

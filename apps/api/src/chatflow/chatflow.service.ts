@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FlowiseApi } from '@nova/flowise-api';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -68,6 +68,11 @@ export class ChatflowService {
       metadata: JSON.parse(doc.metadata) as Record<string, any>,
       pageContent: doc.pageContent,
     }));
+
+    Logger.debug(
+      `Upsert chatflow callback. Number of documents: ${parsedDocument.length}`,
+      'ChatflowService',
+    );
 
     this.eventEmitter.emit('chatflow.upserted', {
       chatflow: chatflow,

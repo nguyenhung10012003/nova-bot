@@ -52,5 +52,6 @@ COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/we
 COPY --from=installer --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 EXPOSE 3001
+ENV HOSTNAME="0.0.0.0"
 ENV PORT=3001
 CMD ["node", "apps/web/server.js"]

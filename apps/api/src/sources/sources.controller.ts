@@ -18,7 +18,7 @@ import { ALLOWED_DOCUMENT_FILE_TYPES } from 'src/constant';
 import { StorageService } from 'src/storage-disk/storage.service';
 import { CreateSourceDto } from './sources.dto';
 import { SourcesService } from './sources.service';
-
+import { DecodeFilenameInterceptor } from 'src/interceptors/decode-filename.interceptor';
 @Controller('sources')
 @UseGuards(AccessTokenGuard)
 export class SourcesController {
@@ -96,6 +96,7 @@ export class SourcesController {
         }
       },
     }),
+    DecodeFilenameInterceptor
   )
   async updateSource(
     @Body()
@@ -108,6 +109,7 @@ export class SourcesController {
     if (files?.length > 0) {
       const filesPath = await Promise.all(
         files.map(async (file) => {
+          console.log(file.originalname)
           const url = await this.storageService.saveFile(file);
           return {
             name: file.originalname,
@@ -115,10 +117,14 @@ export class SourcesController {
           };
         }),
       );
-      return this.sourcesService.updateSource(id, {
-        ...data,
-        files: data.files ? [...data.files, ...filesPath] : filesPath,
-      });
+      return this.sourcesService.updateSource(
+        id,
+        {
+          ...data,
+          files: data.files ? [...data.files, ...filesPath] : filesPath,
+        },
+        true,
+      );
     }
     return this.sourcesService.updateSource(id, data);
   }

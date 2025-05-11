@@ -17,7 +17,8 @@ export interface SaveFileValidation {
 }
 
 export interface GetFileOptions extends SaveFileOptions {
-  fileName: string;
+  fileName?: string;
+  filePath?: string;
   transform?: <T = any>(file: Buffer) => T;
 }
 
@@ -33,7 +34,8 @@ export class StorageService {
   }
 
   async getFile(options: GetFileOptions) {
-    const filePath = path.join(
+    const filePath = options.filePath ? options.filePath : 
+    path.join(
       this.baseStoragePath,
       options.path || '/',
       options.fileName,
@@ -60,8 +62,8 @@ export class StorageService {
       const fileExtension = path.extname(file);
       const fileName = `${uuidv7()}${fileExtension}`;
 
-      await downloadFileFromUrl(file, { dirPath, name: fileName });
-      return `STORAGE::${options.path || ''}/${fileName}`;
+      const filePath = await downloadFileFromUrl(file, { dirPath, name: fileName });
+      return filePath.replace(this.baseStoragePath, 'STORAGE::');
     }
     const uuid = uuidv7();
     const fileName = `${uuid}-${options.fileName || file.originalname}`;
@@ -70,7 +72,7 @@ export class StorageService {
     await fs.promises.mkdir(path.dirname(uploadPath), { recursive: true });
     await fs.promises.writeFile(uploadPath, file.buffer);
 
-    const fileUrl = `STORAGE::${options.path}/${fileName}`;
+    const fileUrl = uploadPath.replace(this.baseStoragePath, 'STORAGE::');
     return fileUrl;
   }
 

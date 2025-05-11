@@ -63,7 +63,8 @@ WORKDIR /app
 # First install dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-RUN yarn install --frozen-lockfile
+ENV NODE_ENV=production
+RUN yarn install 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
 

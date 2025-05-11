@@ -6,6 +6,7 @@ import { DocumentWorker } from './document.worker';
 import { FileWorker } from './file.worker';
 import { WorkerService } from './worker.service';
 import { WorkerEventListenerService } from './worker-event-listener.service';
+import { UnstructuredWorker } from './unstructred.worker';
 
 @Global()
 @Module({
@@ -16,7 +17,7 @@ import { WorkerEventListenerService } from './worker-event-listener.service';
       });
     }),
   ],
-  providers: [WorkerService, CrawlWorker, DocumentWorker, FileWorker, WorkerEventListenerService],
+  providers: [WorkerService, CrawlWorker, DocumentWorker, FileWorker, WorkerEventListenerService, UnstructuredWorker],
   exports: [WorkerService],
 })
 export class WorkerModule {}
