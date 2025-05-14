@@ -41,8 +41,10 @@ FROM base AS runner
 WORKDIR /app
 
 # Don't run production as root
-RUN addgroup --system --gid 1001 nestjs
-RUN adduser --system --uid 1001 nestjs
+RUN addgroup --system --gid 1001 nestjs && \
+  adduser --system --uid 1001 nestjs && \
+  mkdir -p /app/storage && \
+  chown -R nestjs:nestjs /app/storage
 USER nestjs
 COPY --from=installer /app .
 

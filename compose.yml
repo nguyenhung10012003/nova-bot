@@ -37,6 +37,8 @@ services:
       - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
       - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
       - FACEBOOK_WEBHOOK_VERIFY_TOKEN=${FACEBOOK_WEBHOOK_VERIFY_TOKEN}
+    volumes:
+      - api-public:/app/storage
     # networks:
     #   - nova_network
 
@@ -58,3 +60,5 @@ services:
 # networks:
 #   nova_network:
 #     external: true
+volumes:
+  api-public:
