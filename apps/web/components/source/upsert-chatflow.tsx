@@ -15,7 +15,7 @@ type UpsertChatflowProps = {
 export function UpsertChatflow({chatflow}: UpsertChatflowProps) {
 
   const upsertSource = async () => {
-    const res = await api.get(`/chatflow/${chatflow.id}/upsert`);
+    const res = await api.get(`/chatflow/${chatflow.id}/upsert-vector`);
     if (res.error) {
       toast.error("Failed to upsert chatflow");
     } else {

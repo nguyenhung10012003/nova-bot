@@ -41,9 +41,42 @@ export class FacebookWebhookService {
       return;
     }
 
+    const customer = await this.prisma.customer.findUnique({
+      where: {
+        fbId: senderId,
+      },
+    });
+
+    if (!customer) {
+      await this.prisma.customer.create({
+        data: {
+          fbId: senderId,
+        },
+      });
+    }
+
+    let customerPage = await this.prisma.customerIntegration.findUnique({
+      where: {
+        customerId_integrationId: {
+          customerId: customer.id,
+          integrationId: page.id,
+        },
+      },
+    });
+
+    if (!customerPage) {
+      customerPage = await this.prisma.customerIntegration.create({
+        data: {
+          customerId: customer.id,
+          integrationId: page.id,
+        },
+      });
+    }
+
     const botResponse = await this.chatService.getBotMessages(
       page.chatflowId,
       message.text,
+      customerPage.id,
     );
 
     if (botResponse) {

@@ -30,9 +30,13 @@ export function LoginForm({
 
     try {
       const response = await api.post('/auth/login', { email, password });
+      if ('error' in response) {
+        setSubmitError(response.error);
+        return;
+      }
       setAuth(response);
       router.push('/dashboard'); // Redirect to dashboard on successful sign-in
-      toast.success('Welcome back!');
+      // toast.success('Welcome back!');
     } catch (error) {
       console.error(error);
       setSubmitError('An error occurred. Please try again.');

@@ -77,7 +77,7 @@ export function FetchSettingDialog({ source }: FetchSettingDialogProps) {
           ? parseInt(data.maxUrls as string)
           : undefined,
         autoFetch: autoCrawl,
-        filePattern: includeFilePattern ? filePattern : '',
+        filePattern: includeFilePattern ? filePattern : [],
         cronExpression: autoCrawl ? generateCronString(recurrence) : undefined,
       },
     });

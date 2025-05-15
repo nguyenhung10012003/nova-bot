@@ -27,9 +27,10 @@ type DeleteSourceProps = {
     id: string;
     name: string;
   };
+  trigger?: React.ReactNode;
 };
 
-export default function DeleteSource({ source }: DeleteSourceProps) {
+export default function DeleteSource({ source, trigger }: DeleteSourceProps) {
   const goBack = useGoBack();
 
   const deleteSource = async () => {

@@ -59,6 +59,21 @@ export class SourcesService implements OnModuleInit {
       data,
     });
 
+    if (data.type === 'TEXT' && source.text.length) {
+      await this.prisma.document.create({
+        data: {
+          sourceId: source.id,
+          pageContent: source.text.join('\n'),
+          metadata: JSON.stringify({
+            name: source.name,
+          }),
+          chatflowId: source.chatflowId,
+        },
+      });
+
+      return source;
+    }
+
     // await this.workerService.addJob(
     //   SOURCE_WORKER,
     //   `crawl-source-${source.id}`,
@@ -100,6 +115,27 @@ export class SourcesService implements OnModuleInit {
           : undefined,
       },
     });
+
+    if (data.type === 'TEXT' && source.text.length) {
+      await this.prisma.document.deleteMany({
+        where: {
+          sourceId: source.id,
+        },
+      });
+
+      await this.prisma.document.create({
+        data: {
+          sourceId: source.id,
+          pageContent: source.text.join('\n'),
+          metadata: JSON.stringify({
+            name: source.name,
+          }),
+          chatflowId: source.chatflowId,
+        },
+      });
+
+      return source;
+    }
 
     if (source.fetchSetting?.autoFetch && source.fetchSetting?.cronExpression) {
       await this.schedulerService.removeCronJob(`auto-crawl-${source.id}`);

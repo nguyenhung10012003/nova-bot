@@ -3,7 +3,7 @@ export interface Source {
   id: string;
   type: 'WEBSITE' | 'FILE' | 'TEXT';
   rootUrl?: string;
-  text?: string;
+  text?: string[];
   chatflowId: string;
   sourceStatus: 'CREATED' | 'PROCESSING' | 'PROCESSED' | 'SYNED' | 'ERROR';
   urls?: {

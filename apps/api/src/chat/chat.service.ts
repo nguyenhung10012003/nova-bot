@@ -49,6 +49,7 @@ export class ChatService {
   async getBotMessages(
     chatflowId: string,
     message: string,
+    chatId?: string,
   ): Promise<NoStreamResponse> {
     const chatflow = await this.prismaService.chatflow.findUnique({
       where: { id: chatflowId },
@@ -64,6 +65,7 @@ export class ChatService {
         chatflowId: chatflow.chatflowId,
         streaming: false,
         question: message,
+        chatId,
       });
       if ('success' in res) {
         if (res.success === false) throw new Error((res as any).message);

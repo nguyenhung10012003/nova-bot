@@ -13,9 +13,11 @@ import {
   FormMessage,
 } from '@nova/ui/components/ui/form';
 import { Input } from '@nova/ui/components/ui/input';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { toast } from '@nova/ui/components/ui/sonner';
 
 const formSchema = z.object({
   chatflowId: z.string().min(1, { message: 'Chatflow ID is required' }),
@@ -41,12 +43,19 @@ export default function CreateChatflowForm() {
     },
   });
 
+  const router = useRouter();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      await api.post('/chatflow', values);
+      const chatflow = await api.post('/chatflow', values);
       revalidate('chatflows');
       form.reset();
+      if ('error' in chatflow) {
+        toast.error(chatflow.error);
+        return;
+      }
+      router.push(`/dashboard/${chatflow.id}`);
     } catch (error) {
       console.error(error);
     } finally {

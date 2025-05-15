@@ -46,30 +46,34 @@ export class DocumentWorker extends WorkerHost {
 
       const documents = partitions.flat();
 
-      // Save all files and webs to database
-      const batch = await this.prismaService.document.createMany({
-        data:
-          documents
-            ?.map((doc: any) => ({
-              pageContent: doc.text,
-              metadata: JSON.stringify(doc.metadata),
+      const allDocuments =
+        documents
+          ?.map((doc: any) => ({
+            pageContent: doc.text,
+            metadata: JSON.stringify(doc.metadata),
+            sourceId: source.id,
+            chatflowId: source.chatflowId,
+          }))
+          .concat(
+            web?.map((url) => ({
+              pageContent: `${url.title} -\n ${url.content}`,
+              metadata: JSON.stringify({
+                name: url.title,
+                source: url.url,
+                title: url.title,
+                url: url.url,
+              }),
               sourceId: source.id,
               chatflowId: source.chatflowId,
-            }))
-            .concat(
-              web?.map((url) => ({
-                pageContent: `${url.title} -\n ${url.content}`,
-                metadata: JSON.stringify({
-                  name: url.title,
-                  source: url.url,
-                  title: url.title,
-                  url: url.url,
-                }),
-                sourceId: source.id,
-                chatflowId: source.chatflowId,
-              })) || [],
-            ) || [],
-      });
+            })) || [],
+          ) || [];
+      // Save all files and webs to database
+      let batch;
+      if (allDocuments.length > 0) {
+        batch = await this.prismaService.document.createMany({
+          data: allDocuments,
+        });
+      }
 
       await this.prismaService.source.update({
         where: {
@@ -80,7 +84,7 @@ export class DocumentWorker extends WorkerHost {
         },
       });
       Logger.debug(
-        `Processed document source: ${source.id}, Number of Document added: ${batch.count}`,
+        `Processed document source: ${source.id}, Number of Document added: ${batch?.count}`,
         'DocumentWorker',
       );
     } catch (e) {

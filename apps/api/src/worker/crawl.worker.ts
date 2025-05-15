@@ -26,6 +26,7 @@ export class CrawlWorker extends WorkerHost {
 
       if (source.type === 'WEBSITE') {
         const crawlData = await this.processWebSource(source);
+        console.log(crawlData);
         await this.workerService.addJob(
           FILE_WORKER,
           `process-files-${source.id}`,
@@ -102,6 +103,10 @@ export class CrawlWorker extends WorkerHost {
 
       return { filesUrl, websUrl };
     } else {
+      Logger.debug(
+        `No urls found for source with id: ${source.id}`,
+        'SourceWorker',
+      );
       return null;
     }
   }

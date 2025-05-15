@@ -14,17 +14,21 @@ import {
 } from '@nova/ui/components/ui/dialog';
 import { Input } from '@nova/ui/components/ui/input';
 import { Label } from '@nova/ui/components/ui/label';
+import { Textarea } from '@nova/ui/components/ui/textarea';
 import { Plus } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
 type SourceDialogProps = {
   source?: Source;
   trigger?: React.ReactNode;
-  type?: 'WEBSITE' | 'FILE';
+  type?: 'WEBSITE' | 'FILE' | 'TEXT';
 };
-export function SourceDialog({ source, trigger, type = 'WEBSITE' }: SourceDialogProps) {
+export function SourceDialog({
+  source,
+  trigger,
+  type = 'WEBSITE',
+}: SourceDialogProps) {
   const isEdit = useMemo(() => !!source, [source]);
   const [open, setOpen] = useState(false);
   const { chatflowId } = useParams();
@@ -39,6 +43,7 @@ export function SourceDialog({ source, trigger, type = 'WEBSITE' }: SourceDialog
         rootUrl: data.url,
         type: source?.type,
         chatflowId,
+        text: data.text ? [data.text] : undefined,
       });
       if (res.error) {
         console.error(res.error);
@@ -55,6 +60,7 @@ export function SourceDialog({ source, trigger, type = 'WEBSITE' }: SourceDialog
         rootUrl: data.url,
         type: type,
         chatflowId,
+        text: data.text ? [data.text] : undefined,
       });
       if (res.error) {
         console.error(res.error);
@@ -96,17 +102,32 @@ export function SourceDialog({ source, trigger, type = 'WEBSITE' }: SourceDialog
               required
             />
           </div>
-          {type === 'WEBSITE' && <div className="flex flex-col space-y-2">
-            <Label htmlFor="url">Url</Label>
-            <Input
-              id="url"
-              type="text"
-              name="url"
-              placeholder="https://example.com"
-              defaultValue={source?.rootUrl}
-              required
-            />
-          </div>}
+          {type === 'WEBSITE' && (
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="url">Url</Label>
+              <Input
+                id="url"
+                type="text"
+                name="url"
+                placeholder="https://example.com"
+                defaultValue={source?.rootUrl}
+                required
+              />
+            </div>
+          )}
+          {type === 'TEXT' && (
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="text">Text</Label>
+              <Textarea
+                id="text"
+                name="text"
+                placeholder="Enter text"
+                defaultValue={source?.text}
+                required
+                rows={10}
+              />
+            </div>
+          )}
           <DialogFooter>
             <Button type="submit">Save</Button>
           </DialogFooter>

@@ -76,7 +76,7 @@ export class ChatGateway
       data: { ...userMessage, botIsThinking: true },
     });
 
-    const botResponse = await this.chatService.getBotMessages(data.chatflowId, data.message);
+    const botResponse = await this.chatService.getBotMessages(data.chatflowId, data.message, chatSessionId);
 
     // Lưu tin nhắn phản hồi vào database
     const systemMessage = await this.prismaService.chatMessage.create({

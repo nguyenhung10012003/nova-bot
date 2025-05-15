@@ -110,6 +110,11 @@ export class FileWorker extends WorkerHost {
         return;
       }
     } catch (_e) {
+      Logger.error(
+        `Failed when processing source with id: ${source.id}`,
+        _e,
+        'FileWorker',
+      );
       await this.prismaService.source.update({
         where: {
           id: source.id,
