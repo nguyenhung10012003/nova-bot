@@ -1,7 +1,7 @@
 FROM node:20-bookworm-slim AS base
 WORKDIR /app
 ENV YARN_VERSION=4.6.0
-
+ENV CHROME_VERSION=131.0.6778.108
 RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 
 # Install latest Chrome dev packages and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
@@ -32,8 +32,8 @@ RUN apt update \
   && mkdir -p /etc/default && echo 'repo_add_once=false' > /etc/default/google-chrome \
   \
   # Install chrome
-  && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -nv \
-  && apt install --fix-missing -yq ./google-chrome-stable_current_amd64.deb && rm ./google-chrome-stable_current_amd64.deb \
+  && wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb -nv \
+  && apt install --fix-missing -yq ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb && rm ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb \
   \
   # Add user so we don't need --no-sandbox.
   && groupadd -r myuser && useradd -r -g myuser -G audio,video myuser \
@@ -50,6 +50,7 @@ RUN apt update \
   && rm -rf /root/.npm \
   # This is needed to remove an annoying error message when running headful.
   && mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+RUN google-chrome --version
 
 FROM base AS builder
 WORKDIR /app
