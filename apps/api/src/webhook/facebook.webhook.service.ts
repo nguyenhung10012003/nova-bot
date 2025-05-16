@@ -41,14 +41,14 @@ export class FacebookWebhookService {
       return;
     }
 
-    const customer = await this.prisma.customer.findUnique({
+    let customer = await this.prisma.customer.findUnique({
       where: {
         fbId: senderId,
       },
     });
 
     if (!customer) {
-      await this.prisma.customer.create({
+      customer = await this.prisma.customer.create({
         data: {
           fbId: senderId,
         },
